@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>総当たり内容</title>
+    <title>総当たり戦結果</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
             background-color: #f5f5f5;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: white;
             padding: 20px;
@@ -22,6 +22,7 @@
             text-align: center;
             color: #333;
             margin-bottom: 30px;
+            font-size: 2em;
         }
         .section {
             margin-bottom: 40px;
@@ -37,76 +38,100 @@
             border-collapse: collapse;
             margin: 10px 0;
             width: 100%;
-            max-width: 600px;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px;
             text-align: center;
         }
         th {
             background-color: #f2f2f2;
             font-weight: bold;
         }
-        .match-table td:first-child {
+        .match-table th, .match-table td:first-child {
             background-color: #e8f5e8;
             font-weight: bold;
         }
-        .grid-table {
-            display: inline-block;
-            margin-right: 20px;
-            vertical-align: top;
+        .results-grid th:first-child, .results-grid td:first-child {
+            background-color: #f2f2f2;
         }
-        .number-grid td {
-            width: 40px;
-            height: 40px;
+        .gray { background-color: #d3d3d3; }
+        .lightblue { background-color: #add8e6; }
+        .red { background-color: #ff6347; }
+        .yellow { background-color: #ffff00; }
+        .orange { background-color: #ffa500; }
+        .green { background-color: #90ee90; }
+        
+        .participant-list, .character-list {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .participant-box, .character-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
             font-weight: bold;
+            min-width: 100px;
         }
-        .green { background-color: #90EE90 !important; }
-        .blue { background-color: #87CEEB !important; }
-        .yellow { background-color: #FFFF99 !important; }
-        .red { background-color: #FF6B6B !important; }
-        .orange { background-color: #FFA500 !important; }
-        .character-list {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .character-section {
-            border: 2px solid #ddd;
+        .participant-box.royal { background-color: #add8e6; }
+        .participant-box.nightmare { background-color: #ffff00; }
+        .participant-box.highlander { background-color: #ffa500; }
+        .participant-box.witch { background-color: #ff69b4; }
+        .participant-box.bishop { background-color: #ff6347; }
+
+        .character-box.royal { background-color: #87CEEB; }
+        .character-box.nightmare { background-color: #FFFF99; }
+        .character-box.highlander { background-color: #FFA500; }
+        .character-box.witch { background-color: #FF69B4; }
+        .character-box.bishop { background-color: #90EE90; }
+
+        .note {
+            margin-top: 20px;
             padding: 10px;
-            border-radius: 5px;
-            min-width: 120px;
-        }
-        .royal { background-color: #87CEEB; }
-        .fight { background-color: #FFFF99; }
-        .high { background-color: #FFA500; }
-        .pink { background-color: #FF69B4; }
-        .game-stats {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .stat-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+            background-color: #e0f2f1;
+            border-left: 5px solid #009688;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 総当たり戦ですよ。</h1>
-        
-        <!-- 試合結果セクション -->
+        <h1>🎮 総当たり戦結果</h1>
+
+        <div class="section">
+            <h2>👥 参加者とキャラクター</h2>
+            <div class="participant-list">
+                <div class="participant-box royal">
+                    <p><strong>1: S.K</strong></p>
+                    <p>ロイヤル</p>
+                </div>
+                <div class="participant-box nightmare">
+                    <p><strong>2: H.K</strong></p>
+                    <p>ナイトメア</p>
+                </div>
+                <div class="participant-box highlander">
+                    <p><strong>3: S.R</strong></p>
+                    <p>ハイランダー</p>
+                </div>
+                <div class="participant-box witch">
+                    <p><strong>4: S.N</strong></p>
+                    <p>ウィッチ</p>
+                </div>
+                <div class="participant-box bishop">
+                    <p><strong>5: N.T</strong></p>
+                    <p>ビショップ</p>
+                </div>
+            </div>
+        </div>
+
         <div class="section">
             <h2>🏆 対戦表</h2>
             <table class="match-table">
                 <thead>
                     <tr>
-                        <th>試合</th>
-                        <th>対戦</th>
+                        <th>試合番号</th>
+                        <th>対戦カード</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -124,129 +149,69 @@
             </table>
         </div>
 
-<!DOCTYPE html>
-<html>
-<head>
-<title>HTML Table Example (Corrected)</title>
-<style>
-  table {
-    border-collapse: collapse; /* セルの境界線を結合 */
-    width: 50%; /* テーブルの幅 */
-    margin: 20px 0; /* 上下の余白 */
-  }
-  th, td {
-    border: 1px solid black; /* セルの境界線 */
-    padding: 10px; /* セル内の余白 */
-    text-align: center; /* テキストを中央揃え */
-    min-width: 40px; /* セルの最小幅を設定して見た目を整える */
-  }
-  th {
-    background-color: #e0ffe0; /* ヘッダーセルの背景色を薄緑に */
-  }
-  th:first-child { /* 左上の空のヘッダーセル */
-    background-color: #d3d3d3; /* グレー */
-  }
-  .gray { background-color: #d3d3d3; } /* グレー */
-  .lightblue { background-color: #add8e6; } /* 水色 */
-  .red { background-color: #ff6347; } /* 赤 */
-  .yellow { background-color: #ffff00; } /* 黄色 */
-  .orange { background-color: #ffa500; } /* オレンジ */
-  .green { background-color: #90ee90; } /* 緑 */
-</style>
-</head>
-<body>
-
-<table>
-  <thead>
-    <tr>
-      <th></th> <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>1</th>
-      <td class="gray"></td>
-      <td></td>
-      <td></td>
-      <td class="lightblue">〇</td>
-      <td class="red">×</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td></td>
-      <td class="gray"></td>
-      <td></td>
-      <td class="yellow">〇</td>
-      <td class="yellow">〇</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td></td>
-      <td class="orange">×</td>
-      <td class="gray"></td>
-      <td class="red">×</td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td class="lightblue">×</td>
-      <td></td>
-      <td class="green">〇</td>
-      <td class="gray"></td>
-      <td></td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td class="red">〇</td>
-      <td class="yellow">×</td>
-      <td></td>
-      <td></td>
-      <td class="gray"></td>
-    </tr>
-  </tbody>
-</table>
-
-</body>
-</html>
-                    <div style="margin-bottom: 10px;">
-                        <strong>参加者</strong><br>
-                        <span style="background-color: #87CEEB; padding: 2px 8px;">S.K</span><br>
-                        <span style="background-color: #FFFF99; padding: 2px 8px;">H.K</span><br>
-                        <span style="background-color: #FFA500; padding: 2px 8px;">S.R</span><br>
-                        <span style="background-color: #FF69B4; padding: 2px 8px;">S.N</span><br>
-                        <span style="background-color: #FF6B6B; padding: 2px 8px;">N.T</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- キャラクター分類セクション -->
         <div class="section">
-            <h2>👥 キャラクター分類</h2>
-            <div class="character-list">
-                <div class="character-section">
-                    <div style="background-color: #90EE90; padding: 5px; text-align: center; font-weight: bold;">ビショップ</div>
-                </div>
-                <div class="character-section royal">
-                    <div style="background-color: #87CEEB; padding: 5px; text-align: center; font-weight: bold;">ロイヤル</div>
-                </div>
-                <div class="character-section fight">
-                    <div style="background-color: #FFFF99; padding: 5px; text-align: center; font-weight: bold;">ナイトメア</div>
-                </div>
-                <div class="character-section high">
-                    <div style="background-color: #FFA500; padding: 5px; text-align: center; font-weight: bold;">ハイランダー</div>
-                </div>
-                <div class="character-section pink">
-                    <div style="background-color: #FF69B4; padding: 5px; text-align: center; font-weight: bold;">ウィッチ</div>
-                </div>
-            </div>
-        </div>
-
-
+            <h2>📝 結果グリッド</h2>
+            <table class="results-grid">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        <th>5</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>1</th>
+                        <td class="gray"></td>
+                        <td class="white"></td>
+                        <td class="white"></td>
+                        <td class="lightblue">〇</td>
+                        <td class="red">×</td>
+                    </tr>
+                    <tr>
+                        <th>2</th>
+                        <td class="white"></td>
+                        <td class="gray"></td>
+                        <td class="white"></td>
+                        <td class="yellow">〇</td>
+                        <td class="yellow">〇</td>
+                    </tr>
+                    <tr>
+                        <th>3</th>
+                        <td class="white"></td>
+                        <td class="yellow">×</td>
+                        <td class="gray"></td>
+                        <td class="green">×</td>
+                        <td class="white"></td>
+                    </tr>
+                    <tr>
+                        <th>4</th>
+                        <td class="lightblue">×</td>
+                        <td class="white"></td>
+                        <td class="green">〇</td>
+                        <td class="gray"></td>
+                        <td class="white"></td>
+                    </tr>
+                    <tr>
+                        <th>5</th>
+                        <td class="red">〇</td>
+                        <td class="yellow">×</td>
+                        <td class="white"></td>
+                        <td class="white"></td>
+                        <td class="gray"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="note">
+                <p><strong>凡例:</strong></p>
+                <ul>
+                    <li>〇: 勝利</li>
+                    <li>×: 敗北</li>
+                    <li>各セルの色は、対戦相手のキャラクターに対応しています。</li>
+                </ul>
             </div>
         </div>
 
