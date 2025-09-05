@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -222,7 +220,4 @@
         </div>
     </div>
 </body>
-</html>。
-
----
-最終更新: 2025年9月6日
+</html>
