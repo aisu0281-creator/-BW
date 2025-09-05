@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゲームデータ一覧</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 0 0 15px 0;
+            border-radius: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .match-table td:first-child {
+            background-color: #e8f5e8;
+            font-weight: bold;
+        }
+        .grid-table {
+            display: inline-block;
+            margin-right: 20px;
+            vertical-align: top;
+        }
+        .number-grid td {
+            width: 40px;
+            height: 40px;
+            font-weight: bold;
+        }
+        .green { background-color: #90EE90 !important; }
+        .blue { background-color: #87CEEB !important; }
+        .yellow { background-color: #FFFF99 !important; }
+        .red { background-color: #FF6B6B !important; }
+        .orange { background-color: #FFA500 !important; }
+        .character-list {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .character-section {
+            border: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            min-width: 120px;
+        }
+        .royal { background-color: #87CEEB; }
+        .fight { background-color: #FFFF99; }
+        .high { background-color: #FFA500; }
+        .pink { background-color: #FF69B4; }
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 ゲームデータ一覧</h1>
+        
+        <!-- 試合結果セクション -->
+        <div class="section">
+            <h2>🏆 試合結果</h2>
+            <table class="match-table">
+                <thead>
+                    <tr>
+                        <th>試合</th>
+                        <th>結果</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>第1試合</td><td>2 vs 5</td></tr>
+                    <tr><td>第2試合</td><td>3 vs 4</td></tr>
+                    <tr><td>第3試合</td><td>1 vs 5</td></tr>
+                    <tr><td>第4試合</td><td>2 vs 3</td></tr>
+                    <tr><td>第5試合</td><td>1 vs 4</td></tr>
+                    <tr><td>第6試合</td><td>5 vs 2</td></tr>
+                    <tr><td>第7試合</td><td>1 vs 3</td></tr>
+                    <tr><td>第8試合</td><td>4 vs 2</td></tr>
+                    <tr><td>第9試合</td><td>1 vs 2</td></tr>
+                    <tr><td>第10試合</td><td>4 vs 5</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ゲームグリッドセクション -->
+        <div class="section">
+            <h2>🎯 ゲームグリッド</h2>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="grid-table">
+                    <table class="number-grid">
+                        <tr>
+                            <td class="green">1</td>
+                            <td class="green">2</td>
+                            <td class="green">3</td>
+                            <td class="green">4</td>
+                            <td class="green">5</td>
+                        </tr>
+                        <tr>
+                            <td class="green">1</td>
+                            <td class="blue">○</td>
+                            <td class="yellow">○</td>
+                            <td style="background-color: #ddd;"></td>
+                            <td style="background-color: #ddd;"></td>
+                        </tr>
+                        <tr>
+                            <td class="green">2</td>
+                            <td style="background-color: #ddd;"></td>
+                            <td class="yellow">×</td>
+                            <td style="background-color: #ddd;"></td>
+                            <td class="yellow">×</td>
+                        </tr>
+                        <tr>
+                            <td class="green">3</td>
+                            <td class="blue">×</td>
+                            <td class="yellow"></td>
+                            <td class="green">○</td>
+                            <td style="background-color: #ddd;"></td>
+                        </tr>
+                        <tr>
+                            <td class="green">4</td>
+                            <td class="red"></td>
+                            <td class="yellow"></td>
+                            <td style="background-color: #ddd;"></td>
+                            <td style="background-color: #ddd;"></td>
+                        </tr>
+                        <tr>
+                            <td class="green">5</td>
+                            <td class="red"></td>
+                            <td class="yellow"></td>
+                            <td style="background-color: #ddd;"></td>
+                            <td style="background-color: #ddd;"></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>カズとも</strong><br>
+                        <span style="background-color: #87CEEB; padding: 2px 8px;">導入</span><br>
+                        <span style="background-color: #FFFF99; padding: 2px 8px;">確中者</span><br>
+                        <span style="background-color: #FFA500; padding: 2px 8px;">突入</span><br>
+                        <span style="background-color: #FF69B4; padding: 2px 8px;">アリ者</span><br>
+                        <span style="background-color: #FF6B6B; padding: 2px 8px;">野也</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- キャラクター分類セクション -->
+        <div class="section">
+            <h2>👥 キャラクター分類</h2>
+            <div class="character-list">
+                <div class="character-section">
+                    <div style="background-color: #90EE90; padding: 5px; text-align: center; font-weight: bold;">野手</div>
+                </div>
+                <div class="character-section royal">
+                    <div style="background-color: #87CEEB; padding: 5px; text-align: center; font-weight: bold;">ロイヤル</div>
+                </div>
+                <div class="character-section fight">
+                    <div style="background-color: #FFFF99; padding: 5px; text-align: center; font-weight: bold;">ファイトルプ</div>
+                </div>
+                <div class="character-section high">
+                    <div style="background-color: #FFA500; padding: 5px; text-align: center; font-weight: bold;">ハイランダー</div>
+                </div>
+                <div class="character-section pink">
+                    <div style="background-color: #FF69B4; padding: 5px; text-align: center; font-weight: bold;">ピンキング</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ゲーム統計セクション -->
+        <div class="section">
+            <h2>📊 ゲーム統計</h2>
+            <div class="game-stats">
+                <div class="stat-box">
+                    <h4>キャラクター統計</h4>
+                    <table>
+                        <tr><th>H</th><th>T</th><th>N</th><th>P-4</th></tr>
+                        <tr><td>Go</td><td>Go</td><td>Go</td><td>Go</td></tr>
+                    </table>
+                </div>
+                <div class="stat-box">
+                    <h4>後半情報</h4>
+                    <table>
+                        <tr><th>P-6</th><th>P-7</th><th>K</th></tr>
+                        <tr><td>Go</td><td>Go</td><td>Go</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #666; border-top: 1px solid #ddd; padding-top: 20px;">
+            <p>最終更新: 2025年9月6日</p>
+        </div>
+    </div>
+</body>
+</html>
