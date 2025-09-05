@@ -1,79 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>大会ですよ</title>
-    <style>
-        /* 基本のスタイル */
-        body { 
-            font-family: sans-serif; 
-            line-height: 1.6; 
-            background-color: #f4f4f4; /* ページ全体の背景色 */
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        h1, h2, h3 { 
-            color: #333; 
-        }
-        ul { 
-            list-style-type: none; /* リストの点を消す */
-            padding: 0; 
-        }
-        li { 
-            margin-bottom: 10px; 
-        }
-        a { 
-            color: #007bff; 
-            text-decoration: none; 
-        }
-        a:hover { 
-            text-decoration: underline; 
-        }
+    <title>大会ですよ</title>
+    <style>
+        /* 基本のスタイル */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* よりモダンなフォント */
+            line-height: 1.7; /* 行間を少し広げる */
+            background-color: #f8f9fa; /* ページ全体の薄いグレー */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box; /* PaddingとBorderを要素の幅に含める */
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50; /* より落ち着いた見出し色 */
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #1a5a96; /* 青系の見出し色 */
+            margin-top: 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #2980b9; /* 見出しの下線を強調 */
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: none; /* リストの点を非表示 */
+            padding: 0;
+            margin-left: 15px; /* リストの左インデント */
+        }
+        li {
+            margin-bottom: 12px; /* リスト項目の間隔を調整 */
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out; /* ホバー時の色変化を滑らかに */
+        }
+        a:hover {
+            color: #0056b3; /* ホバー時の色を濃く */
+            text-decoration: underline;
+        }
 
-        /* 囲み用のスタイルを適用 */
-        .section { 
-            margin-bottom: 30px; 
-            padding: 20px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            background-color: #ffffff; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-        }
-        h2 {
-            margin-top: 0;
-            border-bottom: 2px solid #007bff; /* タイトルの下に線を引く */
-            padding-bottom: 5px;
-        }
-    </style>
+        /* セクションを囲むためのスタイル */
+        .section-container {
+            background-color: #ffffff; /* セクションの背景を白に */
+            border: 1px solid #dee2e6; /* 薄いグレーの枠線 */
+            border-radius: 10px; /* 角を丸く */
+            padding: 25px; /* 内側の余白を広めに */
+            margin-bottom: 30px; /* セクション間の余白 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* より目立つ影 */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* ホバー時のアニメーション */
+        }
+
+        .section-container:hover {
+            transform: translateY(-3px); /* ホバー時に少し浮き上がる */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        /* 特定のセクション（記事一覧）でリストのスタイルを調整 */
+        .article-list ul {
+            margin-left: 0; /* リストの左インデントをリセット */
+        }
+        .article-list li {
+            position: relative;
+            padding-left: 20px; /* リスト項目への左パディング */
+            margin-bottom: 15px;
+        }
+        .article-list li::before { /* カスタムのリストマーカー */
+            content: '\2022'; /* 黒丸 (Unicode) */
+            color: #007bff; /* 色を青に */
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>◆大会用ページ</h1>
+    <h1>◆大会用ページ</h1>
 
-    <div class="section">
-        <h2>大会概要</h2>
-        <p><strong>大会名:</strong> 第二回シャドバ大会 ○○杯</p>
-        <p><strong>開催日時:</strong> 2025年XX月XX日（X） XX:XX～</p>
-        <p><strong>開催場所:</strong> オンライン開催（できればDiscordを使用）</p>
-        <p><strong>参加資格:</strong> Shadowverseをプレイできる方ならどなたでも！</p>
-        <p><strong>募集期間:</strong> ～2025年XX月XX日（X） XX:XXまで</p>
-        <p><strong>参加費:</strong> 無料</p>
-        <p><strong>賞品:</strong> 次の大会内容を決めれるよ！</p>
-    </div>
+    <div class="section-container">
+        <h2>大会概要</h2>
+        <p><strong>大会名:</strong> 第二回シャドバ大会 ○○杯</p>
+        <p><strong>開催日時:</strong> 2025年XX月XX日（X） XX:XX～</p>
+        <p><strong>開催場所:</strong> オンライン開催（できればDiscordを使用）</p>
+        <p><strong>参加資格:</strong> Shadowverseをプレイできる方ならどなたでも！</p>
+        <p><strong>募集期間:</strong> ～2025年XX月XX日（X） XX:XXまで</p>
+        <p><strong>参加費:</strong> 無料</p>
+        <p><strong>賞品:</strong> 次の大会内容を決めれるよ！</p>
+    </div>
 
-    <div class="section">
-        <h2>記事一覧</h2>
-        <ul>
-            <li><a href="article1.html">第二回シャドバ大会</a></li>
-            <li><a href="rules.html">大会ルール・レギュレーション</a></li>
-            <li><a href="faq.html">よくある質問</a></li>
-        </ul>
-    </div>
+    <div class="section-container article-list">
+        <h2>記事一覧</h2>
+        <ul>
+            <li><a href="article1.html">第二回シャドバ大会</a></li>
+            <li><a href="rules.html">大会ルール・レギュレーション</a></li>
+            <li><a href="faq.html">よくある質問</a></li>
+        </ul>
+    </div>
 
-    <div class="section">
-        <h2>おすすめ動画</h2>
-        <p>↓クリックしな。</p>
-        <a href="https://www.youtube.com/results?search_query=%E3%81%97%E3%82%8D%E3%81%8F%E3%81%BE%E3%82%A2%E3%83%BC%E3%83%A2%E3%83%B3%E3%83%89" target="_blank">しろくまアーモンド</a>
-    </div>
+    <div class="section-container">
+        <h2>おすすめ動画</h2>
+        <p>↓クリックしな。</p>
+        <a href="https://www.youtube.com/results?search_query=%E3%81%97%E3%82%8D%E3%81%8F%E3%81%BE%E3%82%A2%E3%83%BC%E3%83%A2%E3%83%B3%E3%83%89" target="_blank">しろくまアーモンド</a>
+    </div>
 
 </body>
 </html>
