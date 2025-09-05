@@ -97,7 +97,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎮 ゲームデータ一覧</h1>
+        <h1>🎮 </h1>
         
         <!-- 試合結果セクション -->
         <div class="section">
@@ -124,14 +124,35 @@
             </table>
         </div>
 
-        <!-- ゲームグリッドセクション -->
-        <div class="section">
-            <h2>🎯 対戦表</h2>
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div class="grid-table">
-                    <table class="number-grid">
-                        <tr>
-             <table>
+<!DOCTYPE html>
+<html>
+<head>
+<title>HTML Table Example</title>
+<style>
+  table {
+    border-collapse: collapse; /* セルの境界線を結合 */
+    width: 50%; /* テーブルの幅 */
+    margin: 20px 0; /* 上下の余白 */
+  }
+  th, td {
+    border: 1px solid black; /* セルの境界線 */
+    padding: 10px; /* セル内の余白 */
+    text-align: center; /* テキストを中央揃え */
+  }
+  th {
+    background-color: #f2f2f2; /* ヘッダーセルの背景色 */
+  }
+  .gray { background-color: #d3d3d3; } /* グレー */
+  .lightblue { background-color: #add8e6; } /* 水色 */
+  .red { background-color: #ff6347; } /* 赤 */
+  .yellow { background-color: #ffff00; } /* 黄色 */
+  .orange { background-color: #ffa500; } /* オレンジ */
+  .green { background-color: #90ee90; } /* 緑 */
+</style>
+</head>
+<body>
+
+<table>
   <thead>
     <tr>
       <th></th>
@@ -145,46 +166,51 @@
   <tbody>
     <tr>
       <th>1</th>
-      <td style="background-color: #d3d3d3;"></td>
+      <td class="gray"></td>
       <td></td>
       <td></td>
-      <td style="background-color: #add8e6;">〇</td>
-      <td style="background-color: #ff6347;">×</td>
+      <td class="lightblue">〇</td>
+      <td class="red">×</td>
     </tr>
     <tr>
       <th>2</th>
       <td></td>
       <td></td>
-      <td style="background-color: #d3d3d3;"></td>
-      <td style="background-color: #ffff00;">〇</td>
-      <td style="background-color: #ffff00;">〇</td>
+      <td class="gray"></td>
+      <td class="yellow">〇</td>
+      <td class="yellow">〇</td>
     </tr>
     <tr>
       <th>3</th>
       <td></td>
-      <td style="background-color: #ffa500;">×</td>
-      <td style="background-color: #d3d3d3;"></td>
-      <td style="background-color: #ff6347;">×</td>
+      <td class="orange">×</td>
+      <td class="gray"></td>
+      <td class="red">×</td>
       <td></td>
     </tr>
     <tr>
       <th>4</th>
-      <td style="background-color: #add8e6;">×</td>
+      <td class="lightblue">×</td>
       <td></td>
-      <td style="background-color: #90ee90;">〇</td>
-      <td style="background-color: #d3d3d3;"></td>
+      <td class="green">〇</td>
+      <td class="gray"></td>
       <td></td>
     </tr>
     <tr>
       <th>5</th>
-      <td style="background-color: #ff6347;">〇</td>
-      <td style="background-color: #ffff00;">×</td>
+      <td class="red">〇</td>
+      <td class="yellow">×</td>
       <td></td>
-      <td style="background-color: #d3d3d3;"></td>
+      <td class="gray"></td>
       <td></td>
     </tr>
   </tbody>
 </table>
+
+</body>
+</html>
+
+        
                 </div>
                 
                 <div>
