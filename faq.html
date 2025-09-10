@@ -41,27 +41,14 @@
   <div class="container">
     <header>
       <h1>トマト</h1>
-      <p>ここにはまだ何ありません！！</p>
+      <p>Q&Aを追加して知識を共有しましょう</p>
     </header>
 
     <section class="qa-card" aria-labelledby="qa-heading">
       <h2 id="qa-heading" style="margin-top:0;">Q&amp;A</h2>
 
       <ul class="qa-list" id="qaList">
-        <!-- サンプルのQ&A -->
-        <li class="qa-item" data-id="1">
-          <div class="question" tabindex="0">
-            <div>
-              <b>Q. サンプルの質問ですか？</b>
-              <div class="meta">投稿者: 管理者 · 2025-09-10</div>
-            </div>
-            <div class="controls">
-              <button class="toggle" aria-expanded="false" aria-controls="answer-1">＋</button>
-              <button class="delete" title="削除">🗑</button>
-            </div>
-          </div>
-          <div class="answer" id="answer-1">A. はい、これはサンプルの回答です。クリックでトグルします。</div>
-        </li>
+        <!-- サンプルのQ&AはJavaScriptでローカルストレージから読み込まれます -->
       </ul>
 
       <form id="addForm" class="add-form" onsubmit="return false;">
@@ -83,6 +70,69 @@
       const qInput = document.getElementById('qInput');
       const aInput = document.getElementById('aInput');
 
+      // ローカルストレージからQ&Aを読み込む
+      function loadQAItems() {
+        const savedItems = localStorage.getItem('qaItems');
+        if (savedItems) {
+          const items = JSON.parse(savedItems);
+          items.forEach(item => {
+            addQAItemToDOM(item, false);
+          });
+        } else {
+          // 初回アクセス時はサンプルを表示
+          addQAItemToDOM({
+            id: 'sample-1',
+            question: 'サンプルの質問ですか？',
+            answer: 'はい、これはサンプルの回答です。クリックでトグルします。',
+            author: '管理者',
+            date: '2025-09-10'
+          }, false);
+        }
+      }
+
+      // Q&AアイテムをDOMに追加
+      function addQAItemToDOM(item, saveToStorage = true) {
+        const li = document.createElement('li');
+        li.className = 'qa-item';
+        li.setAttribute('data-id', item.id);
+        li.innerHTML = `
+          <div class="question" tabindex="0">
+            <div>
+              <b>Q. ${escapeHtml(item.question)}</b>
+              <div class="meta">投稿者: ${escapeHtml(item.author)} · ${item.date}</div>
+            </div>
+            <div class="controls">
+              <button class="toggle" aria-expanded="false" aria-controls="answer-${item.id}">＋</button>
+              <button class="delete" title="削除">🗑</button>
+            </div>
+          </div>
+          <div class="answer" id="answer-${item.id}">${escapeHtml(item.answer)}</div>
+        `;
+        qaList.insertBefore(li, qaList.firstChild);
+        
+        if (saveToStorage) {
+          saveQAItemsToStorage();
+        }
+      }
+
+      // Q&Aアイテムをローカルストレージに保存
+      function saveQAItemsToStorage() {
+        const items = [];
+        document.querySelectorAll('.qa-item').forEach(item => {
+          // サンプルデータは保存しない
+          if (item.getAttribute('data-id').startsWith('sample-')) return;
+          
+          items.push({
+            id: item.getAttribute('data-id'),
+            question: item.querySelector('.question b').textContent.replace('Q. ', ''),
+            answer: item.querySelector('.answer').textContent,
+            author: item.querySelector('.meta').textContent.split('投稿者: ')[1].split(' · ')[0],
+            date: item.querySelector('.meta').textContent.split(' · ')[1]
+          });
+        });
+        localStorage.setItem('qaItems', JSON.stringify(items));
+      }
+
       // トグル・削除機能（イベントデリゲーション）
       qaList.addEventListener('click', function(e){
         const toggle = e.target.closest('.toggle');
@@ -101,6 +151,7 @@
           const item = del.closest('.qa-item');
           if(confirm('この質問を削除しますか？')){
             item.remove();
+            saveQAItemsToStorage();
           }
         }
       });
@@ -122,18 +173,26 @@
         const aText = aInput.value.trim();
         if(!qText || !aText) return alert('質問と回答の両方を入力してください。');
 
-        const id = Date.now();
-        const li = document.createElement('li');
-        li.className = 'qa-item open';
-        li.setAttribute('data-id', id);
-        li.innerHTML = `\n          <div class="question" tabindex="0">\n            <div>\n              <b>Q. ${escapeHtml(qText)}</b>\n              <div class="meta">投稿者: あなた · ${new Date().toLocaleDateString()}</div>\n            </div>\n            <div class="controls">\n              <button class="toggle" aria-expanded="true" aria-controls="answer-${id}">−</button>\n              <button class="delete" title="削除">🗑</button>\n            </div>\n          </div>\n          <div class="answer" id="answer-${id}">${escapeHtml(aText)}</div>\n        `;
-        qaList.insertBefore(li, qaList.firstChild);
+        const id = 'item-' + Date.now();
+        const newItem = {
+          id: id,
+          question: qText,
+          answer: aText,
+          author: 'あなた',
+          date: new Date().toLocaleDateString()
+        };
+        
+        addQAItemToDOM(newItem);
         qInput.value = '';
         aInput.value = '';
         qInput.focus();
       });
 
-      clearBtn.addEventListener('click', function(){ qInput.value=''; aInput.value=''; qInput.focus(); });
+      clearBtn.addEventListener('click', function(){ 
+        qInput.value=''; 
+        aInput.value=''; 
+        qInput.focus(); 
+      });
 
       // シンプルなエスケープ
       function escapeHtml(text){
@@ -146,6 +205,9 @@
 
       // 初期フォーカス
       qInput.placeholder = '質問例: このサイトはどのように使いますか？';
+      
+      // ページ読み込み時にQ&Aを読み込む
+      document.addEventListener('DOMContentLoaded', loadQAItems);
 
     })();
   </script>
