@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Q&A 保存機能付きページ</title>
+  <title>Q&A 質問者と回答者分離</title>
   <style>
     :root {
       --bg: #f7fafc;
@@ -12,6 +12,8 @@
       --muted: #6b7280;
       --success: #10b981;
       --warning: #f59e0b;
+      --question-color: #3b82f6;
+      --answer-color: #10b981;
     }
     body {
       font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -27,14 +29,14 @@
       text-align: center;
       margin-bottom: 30px;
       padding: 20px;
-      background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+      background: linear-gradient(135deg, #f0f9ff 0%, #fff 100%);
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
     header h1 {
       margin: 0 0 8px;
       font-size: 2.2rem;
-      color: #dc2626;
+      color: #2563eb;
     }
     header p {
       margin: 0 0 20px;
@@ -75,7 +77,7 @@
     }
     .question b {
       font-weight: 700;
-      color: #1f2937;
+      color: var(--question-color);
     }
     .meta {
       font-size: 0.85rem;
@@ -88,9 +90,9 @@
       color: #374151;
       line-height: 1.6;
       padding: 12px 16px;
-      background-color: #f9fafb;
+      background-color: #f0fdf4;
       border-radius: 8px;
-      border-left: 4px solid var(--accent);
+      border-left: 4px solid var(--answer-color);
     }
     .qa-item.open .answer {
       display: block;
@@ -120,14 +122,27 @@
       background-color: #fef2f2;
     }
 
-    /* form */
-    .add-form {
+    /* Forms */
+    .form-section {
       margin-top: 24px;
-      display: grid;
-      gap: 12px;
       padding: 20px;
       background-color: #f9fafb;
       border-radius: 12px;
+    }
+    .form-section h3 {
+      margin-top: 0;
+      color: #374151;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .input-group {
+      margin-bottom: 16px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #4b5563;
     }
     .add-form input, .add-form textarea {
       width: 100%;
@@ -139,8 +154,8 @@
     }
     .add-form input:focus, .add-form textarea:focus {
       outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
     .row {
       display: flex;
@@ -160,15 +175,15 @@
       justify-content: center;
     }
     .btn-primary {
-      background: var(--accent);
+      background: var(--question-color);
       color: #fff;
     }
     .btn-primary:hover {
-      background: #dc2626;
+      background: #2563eb;
       transform: translateY(-2px);
     }
     .btn-success {
-      background: var(--success);
+      background: var(--answer-color);
       color: #fff;
     }
     .btn-success:hover {
@@ -226,6 +241,39 @@
       color: #d97706;
     }
 
+    /* Role selection */
+    .role-selection {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .role-btn {
+      flex: 1;
+      padding: 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .role-btn:hover {
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+    }
+    .role-btn.active {
+      border-color: #3b82f6;
+      background-color: #eff6ff;
+    }
+    .role-btn h3 {
+      color: #1f2937;
+      margin-top: 0;
+    }
+    .role-btn p {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
     /* Animation */
     @keyframes fadeIn {
       from { opacity: 0; }
@@ -238,15 +286,27 @@
       .container { padding: 0 6px; }
       .row { flex-direction: column; }
       .btn { width: 100%; }
+      .role-selection { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>トマト Q&A</h1>
-      <p>質問と回答を追加して知識を共有しましょう</p>
+      <h1>コミュニティ Q&A</h1>
+      <p>質問を投稿したり、他の人の質問に回答したりできます</p>
     </header>
+
+    <div class="role-selection">
+      <div class="role-btn active" id="questionerBtn">
+        <h3>質問者</h3>
+        <p>質問を投稿したい場合</p>
+      </div>
+      <div class="role-btn" id="answererBtn">
+        <h3>回答者</h3>
+        <p>質問に回答したい場合</p>
+      </div>
+    </div>
 
     <section class="qa-card" aria-labelledby="qa-heading">
       <h2 id="qa-heading" style="margin-top:0;">Q&amp;Aリスト</h2>
@@ -257,14 +317,47 @@
         <!-- Q&AはJavaScriptでローカルストレージから読み込まれます -->
       </ul>
 
-      <form id="addForm" class="add-form">
-        <input id="qInput" type="text" placeholder="質問を入力してください（必須）" required />
-        <textarea id="aInput" rows="3" placeholder="回答を入力してください（必須）" required></textarea>
-        <div class="row">
-          <button id="addBtn" class="btn btn-primary">Q&Aを追加</button>
-          <button id="clearBtn" class="btn btn-ghost" type="button">入力をクリア</button>
-        </div>
-      </form>
+      <div class="form-section" id="questionForm">
+        <h3>質問を投稿</h3>
+        <form id="addQuestionForm" class="add-form">
+          <div class="input-group">
+            <label for="questionInput">質問内容</label>
+            <input id="questionInput" type="text" placeholder="質問を入力してください（必須）" required />
+          </div>
+          <div class="input-group">
+            <label for="questionerInput">質問者名</label>
+            <input id="questionerInput" type="text" placeholder="お名前を入力してください（必須）" required />
+          </div>
+          <div class="row">
+            <button id="addQuestionBtn" class="btn btn-primary">質問を投稿</button>
+            <button id="clearQuestionBtn" class="btn btn-ghost" type="button">入力をクリア</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="form-section" id="answerForm" style="display: none;">
+        <h3>回答を投稿</h3>
+        <form id="addAnswerForm" class="add-form">
+          <div class="input-group">
+            <label for="qaSelect">回答する質問を選択</label>
+            <select id="qaSelect" required>
+              <option value="">質問を選択してください</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="answerInput">回答内容</label>
+            <textarea id="answerInput" rows="3" placeholder="回答を入力してください（必須）" required></textarea>
+          </div>
+          <div class="input-group">
+            <label for="answererInput">回答者名</label>
+            <input id="answererInput" type="text" placeholder="お名前を入力してください（必須）" required />
+          </div>
+          <div class="row">
+            <button id="addAnswerBtn" class="btn btn-success">回答を投稿</button>
+            <button id="clearAnswerBtn" class="btn btn-ghost" type="button">入力をクリア</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="save-section">
@@ -280,16 +373,48 @@
 
   <script>
     (function(){
+      // 要素の取得
       const qaList = document.getElementById('qaList');
-      const addBtn = document.getElementById('addBtn');
-      const clearBtn = document.getElementById('clearBtn');
+      const addQuestionBtn = document.getElementById('addQuestionBtn');
+      const clearQuestionBtn = document.getElementById('clearQuestionBtn');
+      const addAnswerBtn = document.getElementById('addAnswerBtn');
+      const clearAnswerBtn = document.getElementById('clearAnswerBtn');
       const saveBtn = document.getElementById('saveBtn');
       const loadBtn = document.getElementById('loadBtn');
       const resetBtn = document.getElementById('resetBtn');
-      const qInput = document.getElementById('qInput');
-      const aInput = document.getElementById('aInput');
+      const questionInput = document.getElementById('questionInput');
+      const questionerInput = document.getElementById('questionerInput');
+      const answerInput = document.getElementById('answerInput');
+      const answererInput = document.getElementById('answererInput');
+      const qaSelect = document.getElementById('qaSelect');
       const statusMessage = document.getElementById('statusMessage');
-      const addForm = document.getElementById('addForm');
+      const addQuestionForm = document.getElementById('addQuestionForm');
+      const addAnswerForm = document.getElementById('addAnswerForm');
+      const questionForm = document.getElementById('questionForm');
+      const answerForm = document.getElementById('answerForm');
+      const questionerBtn = document.getElementById('questionerBtn');
+      const answererBtn = document.getElementById('answererBtn');
+
+      // 現在のモード（質問者 or 回答者）
+      let currentMode = 'questioner';
+
+      // ロール選択の切り替え
+      questionerBtn.addEventListener('click', function() {
+        currentMode = 'questioner';
+        questionerBtn.classList.add('active');
+        answererBtn.classList.remove('active');
+        questionForm.style.display = 'block';
+        answerForm.style.display = 'none';
+      });
+
+      answererBtn.addEventListener('click', function() {
+        currentMode = 'answerer';
+        answererBtn.classList.add('active');
+        questionerBtn.classList.remove('active');
+        questionForm.style.display = 'none';
+        answerForm.style.display = 'block';
+        updateQASelect();
+      });
 
       // ステータスメッセージを表示する関数
       function showStatus(message, isSuccess = true) {
@@ -306,6 +431,7 @@
       function loadQAItems() {
         const savedItems = localStorage.getItem('qaItems');
         qaList.innerHTML = '';
+        qaSelect.innerHTML = '<option value="">質問を選択してください</option>';
         
         if (savedItems) {
           try {
@@ -315,6 +441,7 @@
             } else {
               items.forEach(item => {
                 addQAItemToDOM(item, false);
+                addOptionToSelect(item);
               });
               showStatus('データを読み込みました！');
             }
@@ -327,24 +454,49 @@
         }
       }
 
+      // セレクトボックスにオプションを追加
+      function addOptionToSelect(item) {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.question.substring(0, 50) + (item.question.length > 50 ? '...' : '');
+        qaSelect.appendChild(option);
+      }
+
+      // セレクトボックスを更新
+      function updateQASelect() {
+        qaSelect.innerHTML = '<option value="">質問を選択してください</option>';
+        document.querySelectorAll('.qa-item').forEach(item => {
+          const id = item.getAttribute('data-id');
+          const question = item.querySelector('.question b').textContent.replace('Q. ', '');
+          
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = question.substring(0, 50) + (question.length > 50 ? '...' : '');
+          qaSelect.appendChild(option);
+        });
+      }
+
       // サンプルデータを追加
       function addSampleData() {
         const sampleData = [{
           id: 'sample-1',
           question: 'このサイトはどのように使いますか？',
-          answer: '上部のフォームから質問と回答を入力し、「Q&Aを追加」ボタンをクリックしてください。追加後は「データを保存」ボタンでブラウザに保存できます。',
-          author: '管理者',
+          answer: '上部のフォームから質問を投稿したり、他の人の質問に回答できます。',
+          questioner: '新人ユーザー',
+          answerer: '管理者',
           date: new Date().toLocaleDateString()
         }, {
           id: 'sample-2',
-          question: 'データはどのように保存されますか？',
-          answer: 'データはブラウザのローカルストレージに保存されます。同じブラウザでアクセスすると、以前に保存したデータを読み込むことができます。',
-          author: '管理者',
+          question: '回答はどのように投稿しますか？',
+          answer: '「回答者」ボタンをクリックして、回答したい質問を選択し、回答を入力してください。',
+          questioner: '初心者',
+          answerer: '管理者',
           date: new Date().toLocaleDateString()
         }];
         
         sampleData.forEach(item => {
           addQAItemToDOM(item, false);
+          addOptionToSelect(item);
         });
       }
 
@@ -357,14 +509,17 @@
           <div class="question" tabindex="0">
             <div>
               <b>Q. ${escapeHtml(item.question)}</b>
-              <div class="meta">投稿者: ${escapeHtml(item.author)} · ${item.date}</div>
+              <div class="meta">質問者: ${escapeHtml(item.questioner)} · ${item.date}</div>
             </div>
             <div class="controls">
               <button class="toggle" aria-expanded="false" aria-controls="answer-${item.id}">＋</button>
               <button class="delete" title="削除">🗑</button>
             </div>
           </div>
-          <div class="answer" id="answer-${item.id}">A. ${escapeHtml(item.answer)}</div>
+          <div class="answer" id="answer-${item.id}">
+            <strong>A. </strong>${escapeHtml(item.answer)}
+            <div class="meta" style="margin-top: 8px;">回答者: ${escapeHtml(item.answerer)} · ${item.date}</div>
+          </div>
         `;
         qaList.appendChild(li);
         
@@ -384,12 +539,15 @@
             id: item.getAttribute('data-id'),
             question: item.querySelector('.question b').textContent.replace('Q. ', ''),
             answer: item.querySelector('.answer').textContent.replace('A. ', ''),
-            author: item.querySelector('.meta').textContent.split('投稿者: ')[1].split(' · ')[0],
+            questioner: item.querySelector('.meta').textContent.split('質問者: ')[1].split(' · ')[0],
+            answerer: item.querySelector('.answer .meta') ? 
+                     item.querySelector('.answer .meta').textContent.split('回答者: ')[1].split(' · ')[0] : '未回答',
             date: item.querySelector('.meta').textContent.split(' · ')[1]
           });
         });
         localStorage.setItem('qaItems', JSON.stringify(items));
         showStatus('データを保存しました！');
+        updateQASelect();
       }
 
       // トグル・削除機能（イベントデリゲーション）
@@ -427,12 +585,12 @@
         }
       });
 
-      // 追加ボタン
-      addBtn.addEventListener('click', function(){
-        const qText = qInput.value.trim();
-        const aText = aInput.value.trim();
-        if(!qText || !aText) {
-          showStatus('質問と回答の両方を入力してください。', false);
+      // 質問追加ボタン
+      addQuestionBtn.addEventListener('click', function(){
+        const qText = questionInput.value.trim();
+        const qAuthor = questionerInput.value.trim();
+        if(!qText || !qAuthor) {
+          showStatus('質問内容と質問者名を入力してください。', false);
           return;
         }
 
@@ -440,23 +598,66 @@
         const newItem = {
           id: id,
           question: qText,
-          answer: aText,
-          author: 'あなた',
+          answer: 'まだ回答がありません。',
+          questioner: qAuthor,
+          answerer: '未回答',
           date: new Date().toLocaleDateString()
         };
         
         addQAItemToDOM(newItem);
-        qInput.value = '';
-        aInput.value = '';
-        qInput.focus();
-        showStatus('Q&Aを追加しました！');
+        addOptionToSelect(newItem);
+        questionInput.value = '';
+        questionerInput.value = '';
+        questionInput.focus();
+        showStatus('質問を投稿しました！');
+      });
+
+      // 回答追加ボタン
+      addAnswerBtn.addEventListener('click', function(){
+        const selectedQA = qaSelect.value;
+        const aText = answerInput.value.trim();
+        const aAuthor = answererInput.value.trim();
+        
+        if(!selectedQA) {
+          showStatus('回答する質問を選択してください。', false);
+          return;
+        }
+        if(!aText || !aAuthor) {
+          showStatus('回答内容と回答者名を入力してください。', false);
+          return;
+        }
+
+        // 回答を更新
+        const item = document.querySelector(`.qa-item[data-id="${selectedQA}"]`);
+        if (item) {
+          item.querySelector('.answer').innerHTML = `
+            <strong>A. </strong>${escapeHtml(aText)}
+            <div class="meta" style="margin-top: 8px;">回答者: ${escapeHtml(aAuthor)} · ${new Date().toLocaleDateString()}</div>
+          `;
+          item.classList.add('open');
+          item.querySelector('.toggle').setAttribute('aria-expanded', 'true');
+          item.querySelector('.toggle').textContent = '−';
+          
+          saveQAItemsToStorage();
+          answerInput.value = '';
+          answererInput.value = '';
+          qaSelect.value = '';
+          showStatus('回答を投稿しました！');
+        }
       });
 
       // クリアボタン
-      clearBtn.addEventListener('click', function(){ 
-        qInput.value=''; 
-        aInput.value=''; 
-        qInput.focus(); 
+      clearQuestionBtn.addEventListener('click', function(){ 
+        questionInput.value = ''; 
+        questionerInput.value = ''; 
+        questionInput.focus(); 
+        showStatus('入力をクリアしました');
+      });
+
+      clearAnswerBtn.addEventListener('click', function(){ 
+        answerInput.value = ''; 
+        answererInput.value = ''; 
+        answerInput.focus(); 
         showStatus('入力をクリアしました');
       });
 
@@ -489,9 +690,14 @@
       }
 
       // フォームの送信を防止
-      addForm.addEventListener('submit', function(e){
+      addQuestionForm.addEventListener('submit', function(e){
         e.preventDefault();
-        addBtn.click();
+        addQuestionBtn.click();
+      });
+
+      addAnswerForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        addAnswerBtn.click();
       });
 
       // ページ読み込み時にQ&Aを読み込む
