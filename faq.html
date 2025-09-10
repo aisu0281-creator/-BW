@@ -3,62 +3,278 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Q&A ボックス付きページ</title>
+  <title>Q&A 保存機能付きページ</title>
   <style>
-    :root{--bg:#f7fafc;--card:#ffffff;--accent:#ef4444;--muted:#6b7280}
-    body{font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); margin:24px}
-    .container{max-width:840px;margin:0 auto}
-    header h1{margin:0 0 8px;font-size:1.6rem}
-    header p{margin:0 0 20px;color:var(--muted)}
+    :root {
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --accent: #ef4444;
+      --muted: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    body {
+      font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      margin: 24px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 840px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 2.2rem;
+      color: #dc2626;
+    }
+    header p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
 
     /* Q&A card */
-    .qa-card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
-    .qa-list{margin:0;padding:0;list-style:none}
-    .qa-item{border-top:1px solid #eef2f7;padding:12px 0}
-    .qa-item:first-child{border-top:0}
-    .question{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-    .question b{font-weight:700}
-    .meta{font-size:0.85rem;color:var(--muted)}
-    .answer{margin-top:10px;display:none;color:#111827;line-height:1.6}
-    .qa-item.open .answer{display:block}
-    .controls{display:flex;gap:6px;align-items:center}
-    .toggle,.delete{background:none;border:0;font-size:1.15rem;cursor:pointer}
-    .delete{color:var(--accent)}
+    .qa-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+      margin-bottom: 24px;
+    }
+    .qa-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .qa-item {
+      border-top: 1px solid #eef2f7;
+      padding: 16px 0;
+      transition: all 0.3s ease;
+    }
+    .qa-item:first-child {
+      border-top: 0;
+    }
+    .qa-item:hover {
+      background-color: #f8fafc;
+      border-radius: 8px;
+    }
+    .question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .question b {
+      font-weight: 700;
+      color: #1f2937;
+    }
+    .meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .answer {
+      margin-top: 12px;
+      display: none;
+      color: #374151;
+      line-height: 1.6;
+      padding: 12px 16px;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+    .qa-item.open .answer {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .toggle, .delete {
+      background: none;
+      border: 0;
+      font-size: 1.15rem;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .toggle:hover {
+      background-color: #e5e7eb;
+    }
+    .delete {
+      color: var(--accent);
+    }
+    .delete:hover {
+      background-color: #fef2f2;
+    }
 
     /* form */
-    .add-form{margin-top:18px;display:grid;gap:8px}
-    .add-form input,.add-form textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6edf3;font-size:0.95rem}
-    .row{display:flex;gap:8px}
-    .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
-    .btn-primary{background:var(--accent);color:#fff}
-    .btn-ghost{background:transparent;border:1px solid #e6edf3}
+    .add-form {
+      margin-top: 24px;
+      display: grid;
+      gap: 12px;
+      padding: 20px;
+      background-color: #f9fafb;
+      border-radius: 12px;
+    }
+    .add-form input, .add-form textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+    }
+    .add-form input:focus, .add-form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+    }
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-success:hover {
+      background: #059669;
+      transform: translateY(-2px);
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #e5e7eb;
+      color: #4b5563;
+    }
+    .btn-ghost:hover {
+      background: #f3f4f6;
+    }
+    .btn-warning {
+      background: var(--warning);
+      color: #fff;
+    }
+    .btn-warning:hover {
+      background: #d97706;
+      transform: translateY(-2px);
+    }
+
+    /* Status message */
+    .status-message {
+      padding: 12px;
+      border-radius: 8px;
+      margin: 16px 0;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+    }
+    .status-success {
+      background-color: #d1fae5;
+      color: #065f46;
+      display: block;
+    }
+    .status-error {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      display: block;
+    }
+
+    /* Save section */
+    .save-section {
+      background-color: #fffbeb;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 24px;
+      text-align: center;
+      border: 1px solid #fde68a;
+    }
+    .save-section h3 {
+      margin-top: 0;
+      color: #d97706;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
     /* small screens */
-    @media (max-width:520px){body{margin:12px} .container{padding:0 6px}}
+    @media (max-width: 520px) {
+      body { margin: 12px; }
+      .container { padding: 0 6px; }
+      .row { flex-direction: column; }
+      .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>トマト</h1>
-      <p>Q&Aを追加して知識を共有しましょう</p>
+      <h1>トマト Q&A</h1>
+      <p>質問と回答を追加して知識を共有しましょう</p>
     </header>
 
     <section class="qa-card" aria-labelledby="qa-heading">
-      <h2 id="qa-heading" style="margin-top:0;">Q&amp;A</h2>
+      <h2 id="qa-heading" style="margin-top:0;">Q&amp;Aリスト</h2>
+      
+      <div id="statusMessage" class="status-message"></div>
 
       <ul class="qa-list" id="qaList">
-        <!-- サンプルのQ&AはJavaScriptでローカルストレージから読み込まれます -->
+        <!-- Q&AはJavaScriptでローカルストレージから読み込まれます -->
       </ul>
 
-      <form id="addForm" class="add-form" onsubmit="return false;">
+      <form id="addForm" class="add-form">
         <input id="qInput" type="text" placeholder="質問を入力してください（必須）" required />
         <textarea id="aInput" rows="3" placeholder="回答を入力してください（必須）" required></textarea>
         <div class="row">
-          <button id="addBtn" class="btn btn-primary">追加</button>
+          <button id="addBtn" class="btn btn-primary">Q&Aを追加</button>
           <button id="clearBtn" class="btn btn-ghost" type="button">入力をクリア</button>
         </div>
       </form>
+    </section>
+
+    <section class="save-section">
+      <h3>データの保存</h3>
+      <p>現在のQ&Aをブラウザに保存すると、ページを再読み込みしたり閉じたりしてもデータが残ります</p>
+      <div class="row" style="justify-content: center;">
+        <button id="saveBtn" class="btn btn-success">データを保存</button>
+        <button id="loadBtn" class="btn btn-primary">データを読み込み</button>
+        <button id="resetBtn" class="btn btn-warning">データをリセット</button>
+      </div>
     </section>
   </div>
 
@@ -67,27 +283,69 @@
       const qaList = document.getElementById('qaList');
       const addBtn = document.getElementById('addBtn');
       const clearBtn = document.getElementById('clearBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      const loadBtn = document.getElementById('loadBtn');
+      const resetBtn = document.getElementById('resetBtn');
       const qInput = document.getElementById('qInput');
       const aInput = document.getElementById('aInput');
+      const statusMessage = document.getElementById('statusMessage');
+      const addForm = document.getElementById('addForm');
+
+      // ステータスメッセージを表示する関数
+      function showStatus(message, isSuccess = true) {
+        statusMessage.textContent = message;
+        statusMessage.className = isSuccess ? 'status-message status-success' : 'status-message status-error';
+        
+        // 5秒後にメッセージを非表示にする
+        setTimeout(() => {
+          statusMessage.style.display = 'none';
+        }, 5000);
+      }
 
       // ローカルストレージからQ&Aを読み込む
       function loadQAItems() {
         const savedItems = localStorage.getItem('qaItems');
+        qaList.innerHTML = '';
+        
         if (savedItems) {
-          const items = JSON.parse(savedItems);
-          items.forEach(item => {
-            addQAItemToDOM(item, false);
-          });
+          try {
+            const items = JSON.parse(savedItems);
+            if (items.length === 0) {
+              addSampleData();
+            } else {
+              items.forEach(item => {
+                addQAItemToDOM(item, false);
+              });
+              showStatus('データを読み込みました！');
+            }
+          } catch (e) {
+            console.error('Error parsing saved items:', e);
+            addSampleData();
+          }
         } else {
-          // 初回アクセス時はサンプルを表示
-          addQAItemToDOM({
-            id: 'sample-1',
-            question: 'サンプルの質問ですか？',
-            answer: 'はい、これはサンプルの回答です。クリックでトグルします。',
-            author: '管理者',
-            date: '2025-09-10'
-          }, false);
+          addSampleData();
         }
+      }
+
+      // サンプルデータを追加
+      function addSampleData() {
+        const sampleData = [{
+          id: 'sample-1',
+          question: 'このサイトはどのように使いますか？',
+          answer: '上部のフォームから質問と回答を入力し、「Q&Aを追加」ボタンをクリックしてください。追加後は「データを保存」ボタンでブラウザに保存できます。',
+          author: '管理者',
+          date: new Date().toLocaleDateString()
+        }, {
+          id: 'sample-2',
+          question: 'データはどのように保存されますか？',
+          answer: 'データはブラウザのローカルストレージに保存されます。同じブラウザでアクセスすると、以前に保存したデータを読み込むことができます。',
+          author: '管理者',
+          date: new Date().toLocaleDateString()
+        }];
+        
+        sampleData.forEach(item => {
+          addQAItemToDOM(item, false);
+        });
       }
 
       // Q&AアイテムをDOMに追加
@@ -106,9 +364,9 @@
               <button class="delete" title="削除">🗑</button>
             </div>
           </div>
-          <div class="answer" id="answer-${item.id}">${escapeHtml(item.answer)}</div>
+          <div class="answer" id="answer-${item.id}">A. ${escapeHtml(item.answer)}</div>
         `;
-        qaList.insertBefore(li, qaList.firstChild);
+        qaList.appendChild(li);
         
         if (saveToStorage) {
           saveQAItemsToStorage();
@@ -125,12 +383,13 @@
           items.push({
             id: item.getAttribute('data-id'),
             question: item.querySelector('.question b').textContent.replace('Q. ', ''),
-            answer: item.querySelector('.answer').textContent,
+            answer: item.querySelector('.answer').textContent.replace('A. ', ''),
             author: item.querySelector('.meta').textContent.split('投稿者: ')[1].split(' · ')[0],
             date: item.querySelector('.meta').textContent.split(' · ')[1]
           });
         });
         localStorage.setItem('qaItems', JSON.stringify(items));
+        showStatus('データを保存しました！');
       }
 
       // トグル・削除機能（イベントデリゲーション）
@@ -152,6 +411,7 @@
           if(confirm('この質問を削除しますか？')){
             item.remove();
             saveQAItemsToStorage();
+            showStatus('質問を削除しました');
           }
         }
       });
@@ -171,7 +431,10 @@
       addBtn.addEventListener('click', function(){
         const qText = qInput.value.trim();
         const aText = aInput.value.trim();
-        if(!qText || !aText) return alert('質問と回答の両方を入力してください。');
+        if(!qText || !aText) {
+          showStatus('質問と回答の両方を入力してください。', false);
+          return;
+        }
 
         const id = 'item-' + Date.now();
         const newItem = {
@@ -186,12 +449,34 @@
         qInput.value = '';
         aInput.value = '';
         qInput.focus();
+        showStatus('Q&Aを追加しました！');
       });
 
+      // クリアボタン
       clearBtn.addEventListener('click', function(){ 
         qInput.value=''; 
         aInput.value=''; 
         qInput.focus(); 
+        showStatus('入力をクリアしました');
+      });
+
+      // 保存ボタン
+      saveBtn.addEventListener('click', function(){
+        saveQAItemsToStorage();
+      });
+
+      // 読み込みボタン
+      loadBtn.addEventListener('click', function(){
+        loadQAItems();
+      });
+
+      // リセットボタン
+      resetBtn.addEventListener('click', function(){
+        if(confirm('すべてのデータをリセットしますか？この操作は元に戻せません。')) {
+          localStorage.removeItem('qaItems');
+          loadQAItems();
+          showStatus('データをリセットしました');
+        }
       });
 
       // シンプルなエスケープ
@@ -203,9 +488,12 @@
         });
       }
 
-      // 初期フォーカス
-      qInput.placeholder = '質問例: このサイトはどのように使いますか？';
-      
+      // フォームの送信を防止
+      addForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        addBtn.click();
+      });
+
       // ページ読み込み時にQ&Aを読み込む
       document.addEventListener('DOMContentLoaded', loadQAItems);
 
