@@ -93,6 +93,12 @@
             background-color: #e0f2f1;
             border-left: 5px solid #009688;
         }
+
+        /* 試合終了の行をグレーアウト */
+        .finished {
+            background-color: #eee !important;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -127,7 +133,7 @@
 
         <div class="section">
             <h2>🏆 対戦表</h2>
-            <table class="match-table">
+            <table class="match-table" id="matchTable">
                 <thead>
                     <tr>
                         <th>試合番号</th>
@@ -151,7 +157,7 @@
 
         <div class="section">
             <h2>📝 結果グリッド</h2>
-            <table class="results-grid">
+            <table class="results-grid" id="resultsGrid">
                 <thead>
                     <tr>
                         <th></th>
@@ -219,5 +225,38 @@
             <p>最終更新: 2025年9月6日</p>
         </div>
     </div>
+
+    <<style>
+    /* 対戦カードだけグレーアウト */
+    .finished-card {
+        background-color: #eee !important;
+        color: #888;
+    }
+</style>
+
+<script>
+    function updateFinishedMatches() {
+        const results = document.querySelectorAll("#resultsGrid tbody tr");
+        const matchRows = document.querySelectorAll("#matchTable tbody tr");
+
+        matchRows.forEach(row => {
+            const matchText = row.cells[1].textContent.trim(); // "2 vs 5"
+            const [p1, p2] = matchText.split(" vs ").map(Number);
+
+            let cell1 = results[p1-1].querySelectorAll("td")[p2-1];
+            let cell2 = results[p2-1].querySelectorAll("td")[p1-1];
+
+            if ((cell1 && (cell1.textContent.includes("〇") || cell1.textContent.includes("×"))) ||
+                (cell2 && (cell2.textContent.includes("〇") || cell2.textContent.includes("×")))) {
+                row.cells[1].classList.add("finished-card"); // ← 対戦カードだけ
+            }
+        });
+    }
+
+
+
+
+        document.addEventListener("DOMContentLoaded", updateFinishedMatches);
+    </script>
 </body>
 </html>
