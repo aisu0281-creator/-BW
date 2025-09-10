@@ -21,7 +21,9 @@
     .meta{font-size:0.85rem;color:var(--muted)}
     .answer{margin-top:10px;display:none;color:#111827;line-height:1.6}
     .qa-item.open .answer{display:block}
-    .toggle{background:none;border:0;font-size:1.15rem;cursor:pointer}
+    .controls{display:flex;gap:6px;align-items:center}
+    .toggle,.delete{background:none;border:0;font-size:1.15rem;cursor:pointer}
+    .delete{color:var(--accent)}
 
     /* form */
     .add-form{margin-top:18px;display:grid;gap:8px}
@@ -53,7 +55,10 @@
               <b>Q. サンプルの質問ですか？</b>
               <div class="meta">投稿者: 管理者 · 2025-09-10</div>
             </div>
-            <button class="toggle" aria-expanded="false" aria-controls="answer-1">＋</button>
+            <div class="controls">
+              <button class="toggle" aria-expanded="false" aria-controls="answer-1">＋</button>
+              <button class="delete" title="削除">🗑</button>
+            </div>
           </div>
           <div class="answer" id="answer-1">A. はい、これはサンプルの回答です。クリックでトグルします。</div>
         </li>
@@ -78,15 +83,26 @@
       const qInput = document.getElementById('qInput');
       const aInput = document.getElementById('aInput');
 
-      // トグル機能（イベントデリゲーション）
+      // トグル・削除機能（イベントデリゲーション）
       qaList.addEventListener('click', function(e){
         const toggle = e.target.closest('.toggle');
-        if(!toggle) return;
-        const item = toggle.closest('.qa-item');
-        const expanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!expanded));
-        toggle.textContent = expanded ? '＋' : '−';
-        item.classList.toggle('open');
+        const del = e.target.closest('.delete');
+
+        if(toggle){
+          const item = toggle.closest('.qa-item');
+          const expanded = toggle.getAttribute('aria-expanded') === 'true';
+          toggle.setAttribute('aria-expanded', String(!expanded));
+          toggle.textContent = expanded ? '＋' : '−';
+          item.classList.toggle('open');
+          return;
+        }
+
+        if(del){
+          const item = del.closest('.qa-item');
+          if(confirm('この質問を削除しますか？')){
+            item.remove();
+          }
+        }
       });
 
       // キーボードでも開閉できるようにする
@@ -110,7 +126,7 @@
         const li = document.createElement('li');
         li.className = 'qa-item open';
         li.setAttribute('data-id', id);
-        li.innerHTML = `\n          <div class="question" tabindex="0">\n            <div>\n              <b>Q. ${escapeHtml(qText)}</b>\n              <div class="meta">投稿者: あなた · ${new Date().toLocaleDateString()}</div>\n            </div>\n            <button class="toggle" aria-expanded="true" aria-controls="answer-${id}">−</button>\n          </div>\n          <div class="answer" id="answer-${id}">${escapeHtml(aText)}</div>\n        `;
+        li.innerHTML = `\n          <div class="question" tabindex="0">\n            <div>\n              <b>Q. ${escapeHtml(qText)}</b>\n              <div class="meta">投稿者: あなた · ${new Date().toLocaleDateString()}</div>\n            </div>\n            <div class="controls">\n              <button class="toggle" aria-expanded="true" aria-controls="answer-${id}">−</button>\n              <button class="delete" title="削除">🗑</button>\n            </div>\n          </div>\n          <div class="answer" id="answer-${id}">${escapeHtml(aText)}</div>\n        `;
         qaList.insertBefore(li, qaList.firstChild);
         qInput.value = '';
         aInput.value = '';
