@@ -1,11 +1,137 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Q&A ボックス付きページ</title>
+  <style>
+    :root{--bg:#f7fafc;--card:#ffffff;--accent:#ef4444;--muted:#6b7280}
+    body{font-family: "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); margin:24px}
+    .container{max-width:840px;margin:0 auto}
+    header h1{margin:0 0 8px;font-size:1.6rem}
+    header p{margin:0 0 20px;color:var(--muted)}
 
+    /* Q&A card */
+    .qa-card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .qa-list{margin:0;padding:0;list-style:none}
+    .qa-item{border-top:1px solid #eef2f7;padding:12px 0}
+    .qa-item:first-child{border-top:0}
+    .question{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+    .question b{font-weight:700}
+    .meta{font-size:0.85rem;color:var(--muted)}
+    .answer{margin-top:10px;display:none;color:#111827;line-height:1.6}
+    .qa-item.open .answer{display:block}
+    .toggle{background:none;border:0;font-size:1.15rem;cursor:pointer}
 
-  
-<p>トマト
-<p>ここにはまだ何ありません！！
-  
+    /* form */
+    .add-form{margin-top:18px;display:grid;gap:8px}
+    .add-form input,.add-form textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6edf3;font-size:0.95rem}
+    .row{display:flex;gap:8px}
+    .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-ghost{background:transparent;border:1px solid #e6edf3}
+
+    /* small screens */
+    @media (max-width:520px){body{margin:12px} .container{padding:0 6px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>トマト</h1>
+      <p>ここにはまだ何ありません！！</p>
+    </header>
+
+    <section class="qa-card" aria-labelledby="qa-heading">
+      <h2 id="qa-heading" style="margin-top:0;">Q&amp;A</h2>
+
+      <ul class="qa-list" id="qaList">
+        <!-- サンプルのQ&A -->
+        <li class="qa-item" data-id="1">
+          <div class="question" tabindex="0">
+            <div>
+              <b>Q. サンプルの質問ですか？</b>
+              <div class="meta">投稿者: 管理者 · 2025-09-10</div>
+            </div>
+            <button class="toggle" aria-expanded="false" aria-controls="answer-1">＋</button>
+          </div>
+          <div class="answer" id="answer-1">A. はい、これはサンプルの回答です。クリックでトグルします。</div>
+        </li>
+      </ul>
+
+      <form id="addForm" class="add-form" onsubmit="return false;">
+        <input id="qInput" type="text" placeholder="質問を入力してください（必須）" required />
+        <textarea id="aInput" rows="3" placeholder="回答を入力してください（必須）" required></textarea>
+        <div class="row">
+          <button id="addBtn" class="btn btn-primary">追加</button>
+          <button id="clearBtn" class="btn btn-ghost" type="button">入力をクリア</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    (function(){
+      const qaList = document.getElementById('qaList');
+      const addBtn = document.getElementById('addBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const qInput = document.getElementById('qInput');
+      const aInput = document.getElementById('aInput');
+
+      // トグル機能（イベントデリゲーション）
+      qaList.addEventListener('click', function(e){
+        const toggle = e.target.closest('.toggle');
+        if(!toggle) return;
+        const item = toggle.closest('.qa-item');
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        toggle.textContent = expanded ? '＋' : '−';
+        item.classList.toggle('open');
+      });
+
+      // キーボードでも開閉できるようにする
+      qaList.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' ') {
+          const q = e.target.closest('.question');
+          if(q){
+            e.preventDefault();
+            q.querySelector('.toggle').click();
+          }
+        }
+      });
+
+      // 追加ボタン
+      addBtn.addEventListener('click', function(){
+        const qText = qInput.value.trim();
+        const aText = aInput.value.trim();
+        if(!qText || !aText) return alert('質問と回答の両方を入力してください。');
+
+        const id = Date.now();
+        const li = document.createElement('li');
+        li.className = 'qa-item open';
+        li.setAttribute('data-id', id);
+        li.innerHTML = `\n          <div class="question" tabindex="0">\n            <div>\n              <b>Q. ${escapeHtml(qText)}</b>\n              <div class="meta">投稿者: あなた · ${new Date().toLocaleDateString()}</div>\n            </div>\n            <button class="toggle" aria-expanded="true" aria-controls="answer-${id}">−</button>\n          </div>\n          <div class="answer" id="answer-${id}">${escapeHtml(aText)}</div>\n        `;
+        qaList.insertBefore(li, qaList.firstChild);
+        qInput.value = '';
+        aInput.value = '';
+        qInput.focus();
+      });
+
+      clearBtn.addEventListener('click', function(){ qInput.value=''; aInput.value=''; qInput.focus(); });
+
+      // シンプルなエスケープ
+      function escapeHtml(text){
+        return text.replace(/[&<>"']/g, function(m){
+          return ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"
+          })[m];
+        });
+      }
+
+      // 初期フォーカス
+      qInput.placeholder = '質問例: このサイトはどのように使いますか？';
+
+    })();
+  </script>
 </body>
 </html>
