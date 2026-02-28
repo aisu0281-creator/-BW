@@ -8,6 +8,7 @@
 
 <h2>現在の参加人数：<span id="count">0</span>人</h2>
 
+<h3>エントリーフォーム</h3>
 <form id="form" onsubmit="sendEntry(event)">
     名前：<input id="name" required><br><br>
     ゲームID：<input id="gameid" required><br><br>
@@ -15,6 +16,19 @@
     コメント：<input id="comment"><br><br>
     <button type="submit">エントリー</button>
 </form>
+
+<h3>参加者一覧</h3>
+<table border="1">
+<thead>
+<tr>
+<th>名前</th>
+<th>ゲームID</th>
+<th>Discord</th>
+<th>コメント</th>
+</tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
 
 <script>
 const sheetURL =
@@ -28,11 +42,30 @@ const entryGame = "entry.387215603";
 const entryDiscord = "entry.1564981895";
 const entryComment = "entry.1417704571";
 
-async function updateCount(){
+async function fetchData(){
     const res = await fetch(sheetURL);
     const text = await res.text();
     const rows = text.trim().split("\n");
+
+    // 人数更新
     document.getElementById("count").textContent = rows.length - 1;
+
+    // 一覧更新
+    const tbody = document.getElementById("list");
+    tbody.innerHTML = "";
+
+    rows.slice(1).reverse().forEach(row=>{
+        const cols = row.split(",");
+        const tr = document.createElement("tr");
+
+        cols.forEach(col=>{
+            const td = document.createElement("td");
+            td.textContent = col.replace(/"/g,"");
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    });
 }
 
 async function sendEntry(e){
@@ -52,11 +85,11 @@ async function sendEntry(e){
 
     alert("エントリー完了！");
     document.getElementById("form").reset();
-    setTimeout(updateCount,1500);
+    setTimeout(fetchData,1500);
 }
 
-setInterval(updateCount,5000);
-window.onload = updateCount;
+window.onload = fetchData;
+setInterval(fetchData,5000);
 </script>
 
 </body>
