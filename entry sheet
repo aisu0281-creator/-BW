@@ -1,0 +1,42 @@
+<script>
+const sheetURL =
+"https://docs.google.com/spreadsheets/d/e/ここにCSV公開URL/pub?output=csv";
+
+const formURL =
+"https://docs.google.com/forms/d/e/1FAIpQLSc7UaaqyKeuFvl8aKLzBthW9TH4SFIpds0GsrUiDRKcf3G97g/formResponse";
+
+const entryName = "entry.515437798";
+const entryGame = "entry.387215603";
+const entryDiscord = "entry.1564981895";
+const entryComment = "entry.1417704571";
+
+async function updateCount(){
+    const res = await fetch(sheetURL);
+    const text = await res.text();
+    const rows = text.trim().split("\n");
+    document.getElementById("count").textContent = rows.length - 1;
+}
+
+async function sendEntry(e){
+    e.preventDefault();
+
+    const data = new FormData();
+    data.append(entryName, document.getElementById("name").value);
+    data.append(entryGame, document.getElementById("gameid").value);
+    data.append(entryDiscord, document.getElementById("discord").value);
+    data.append(entryComment, document.getElementById("comment").value);
+
+    await fetch(formURL,{
+        method:"POST",
+        mode:"no-cors",
+        body:data
+    });
+
+    alert("エントリー完了！");
+    document.getElementById("form").reset();
+    setTimeout(updateCount,1500);
+}
+
+setInterval(updateCount,5000);
+window.onload = updateCount;
+</script>
