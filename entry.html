@@ -114,19 +114,29 @@ th {
 <h2>エントリーフォーム</h2>
 
 <form id="form" onsubmit="sendEntry(event)">
-名前：<br>
+
+<div class="form-row">
+<label>名前：</label>
 <input id="name" required>
+</div>
 
-ゲームID：<br>
+<div class="form-row">
+<label>ゲームID：</label>
 <input id="gameid" required>
+</div>
 
-Discord：<br>
+<div class="form-row">
+<label>Discord：</label>
 <input id="discord" required>
+</div>
 
-コメント：<br>
+<div class="form-row">
+<label>コメント：</label>
 <input id="comment">
+</div>
 
 <button type="submit">エントリーする</button>
+
 </form>
 </div>
 
