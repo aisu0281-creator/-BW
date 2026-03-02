@@ -43,12 +43,8 @@
             content: '\2022';
             color: #007bff;
             font-weight: bold;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
             position: absolute;
             left: 0;
-            top: 0;
         }
 
         .section-container {
@@ -66,14 +62,21 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
 
-        a {
-            color: #007bff;
+        .home-btn{
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
             text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        a:hover {
-            color: #0056b3;
-            text-decoration: underline;
+        .home-btn:hover{
+            background-color: #45a049;
         }
 
         .back-link {
@@ -82,13 +85,16 @@
         }
     </style>
 </head>
+
 <body>
 
-    <h1>◆大会ルール・レギュレーション</h1>
+<a href="index.html" class="home-btn">ホームに戻る</a>
+
+<h1>◆大会ルール・レギュレーション</h1>
 
     <div class="section-container">
         <h2>第1条：大会概要</h2>
-        <p>本大会は「シャドーバース ワールドビヨンド」を使用した個人戦総当たり形式で実施します。</p>
+        <p>本大会は「Shadowverse: Worlds Beyond「Shadowverse: Worlds Beyond」を使用した個人戦総当たり形式で実施します。</p>
         <p>参加者全員と1回ずつ対戦し、最も勝利数の多いプレイヤーを優勝とします。</p>
     </div>
 
