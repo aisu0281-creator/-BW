@@ -12,15 +12,18 @@ body {
     color: #333;
     margin: 0;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 h1 {
     text-align: center;
+    color: #2c3e50;
     margin-bottom: 30px;
 }
 
 h2 {
     color: #1a5a96;
+    margin-top: 0;
     padding-bottom: 8px;
     border-bottom: 3px solid #2980b9;
     margin-bottom: 20px;
@@ -28,11 +31,12 @@ h2 {
 
 .section-container {
     background-color: #ffffff;
+    border: 1px solid #dee2e6;
     border-radius: 10px;
     padding: 25px;
     margin-bottom: 30px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: 0.2s;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .section-container:hover {
@@ -40,23 +44,7 @@ h2 {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* ホームボタン復活 */
-.home-btn{
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 15px;
-    background-color: #4CAF50;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: bold;
-}
-
-.home-btn:hover{
-    background-color: #45a049;
-}
-
+/* フォーム横並び */
 .form-row {
     display: flex;
     align-items: center;
@@ -76,6 +64,7 @@ h2 {
     border-radius: 6px;
 }
 
+/* ボタン */
 button {
     padding: 10px 20px;
     background-color: #2980b9;
@@ -85,11 +74,20 @@ button {
     cursor: pointer;
 }
 
-button:hover { background-color: #1f6391; }
+button:hover {
+    background-color: #1f6391;
+}
 
-.delete-btn { background:#e74c3c; }
-.delete-btn:hover { background:#c0392b; }
+.delete-btn {
+    background-color: #e74c3c;
+    padding: 6px 12px;
+}
 
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+/* テーブル */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -98,13 +96,16 @@ table {
 th, td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f1f3f5;
 }
 </style>
 </head>
 
 <body>
-
-<a href="index.html" class="home-btn">ホームに戻る</a>
 
 <h1>◆大会エントリー</h1>
 
@@ -116,6 +117,7 @@ th, td {
 <h2>エントリーフォーム</h2>
 
 <form id="form">
+
 <div class="form-row">
 <label>名前：</label>
 <input id="name" required>
@@ -137,11 +139,13 @@ th, td {
 </div>
 
 <button type="submit">エントリーする</button>
+
 </form>
 </div>
 
 <div class="section-container">
 <h2>参加者一覧</h2>
+
 <table>
 <thead>
 <tr>
@@ -157,10 +161,17 @@ th, td {
 </div>
 
 <script>
-const sheetURL = "（そのまま今のURL）";
-const formURL = "（そのまま今のURL）";
+const sheetURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTHixiOhC6gzmJ3AEKZcCLpViLYrHVnmhYVWcx7jFE2vFPumU2JlYxeOTaK961qDY-pIZ0astOepA7-/pub?output=csv";
 
-fetchData();
+const formURL =
+"https://docs.google.com/forms/d/e/1FAIpQLSc7UaaqyKeuFvl8aKLzBthW9TH4SFIpds0GsrUiDRKcf3G97g/formResponse";
+
+const entryName = "entry.515437798";
+const entryGame = "entry.387215603";
+const entryDiscord = "entry.1564981895";
+const entryComment = "entry.1417704571";
+const deleteFlagEntry = "entry.735085751";
 
 async function fetchData(){
     const res = await fetch(sheetURL);
@@ -169,24 +180,75 @@ async function fetchData(){
 
     const tbody = document.getElementById("list");
     tbody.innerHTML = "";
+
     let count = 0;
 
     rows.slice(1).reverse().forEach(row=>{
-        const cols = row.split(",");
-        if(cols[5] === "削除済み") return;
+        const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+        if(cols[5]?.replace(/"/g,"") === "削除済み") return;
+
         count++;
 
         const tr = document.createElement("tr");
+
         for(let i=1;i<=4;i++){
             const td = document.createElement("td");
-            td.textContent = cols[i];
+            td.textContent = cols[i]?.replace(/"/g,"") || "";
             tr.appendChild(td);
         }
+
+        const deleteTd = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.textContent="削除";
+        btn.className="delete-btn";
+        btn.onclick=()=>deleteEntry(
+            cols[1]?.replace(/"/g,""),
+            cols[2]?.replace(/"/g,""),
+            cols[3]?.replace(/"/g,""),
+            cols[4]?.replace(/"/g,"")
+        );
+
+        deleteTd.appendChild(btn);
+        tr.appendChild(deleteTd);
         tbody.appendChild(tr);
     });
 
-    document.getElementById("count").textContent = count;
+    document.getElementById("count").textContent=count;
 }
+
+document.getElementById("form").addEventListener("submit",async e=>{
+    e.preventDefault();
+
+    const data=new FormData();
+    data.append(entryName,name.value);
+    data.append(entryGame,gameid.value);
+    data.append(entryDiscord,discord.value);
+    data.append(entryComment,comment.value);
+
+    await fetch(formURL,{method:"POST",mode:"no-cors",body:data});
+
+    alert("エントリー完了！");
+    form.reset();
+    setTimeout(fetchData,1000);
+});
+
+async function deleteEntry(name,game,discord,comment){
+    if(!confirm("削除しますか？")) return;
+
+    const data=new FormData();
+    data.append(entryName,name);
+    data.append(entryGame,game);
+    data.append(entryDiscord,discord);
+    data.append(entryComment,comment);
+    data.append(deleteFlagEntry,"削除済み");
+
+    await fetch(formURL,{method:"POST",mode:"no-cors",body:data});
+
+    alert("削除しました");
+    setTimeout(fetchData,1000);
+}
+
+fetchData();
 </script>
 
 </body>
