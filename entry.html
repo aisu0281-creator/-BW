@@ -44,6 +44,24 @@ h2 {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
+/* ホームボタン追加 */
+.home-btn{
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    z-index: 999;
+}
+
+.home-btn:hover{
+    background-color: #45a049;
+}
+
 /* フォーム横並び */
 .form-row {
     display: flex;
@@ -106,6 +124,8 @@ th {
 </head>
 
 <body>
+
+<a href="index.html" class="home-btn">ホームに戻る</a>
 
 <h1>◆大会エントリー</h1>
 
