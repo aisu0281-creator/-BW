@@ -9,22 +9,66 @@ const entryName = "entry.515437798";
 const entryGame = "entry.387215603";
 const entryDiscord = "entry.1564981895";
 const entryComment = "entry.1417704571";
+const deleteFlagEntry = "entry.735085751"; // 削除用
 
-async function updateCount(){
+// 一覧取得
+async function fetchData(){
     const res = await fetch(sheetURL);
     const text = await res.text();
     const rows = text.trim().split("\n");
-    document.getElementById("count").textContent = rows.length - 1;
+
+    const tbody = document.getElementById("list");
+    tbody.innerHTML = "";
+
+    let count = 0;
+
+    rows.slice(1).reverse().forEach(row=>{
+        const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+
+        // 削除済みは表示しない
+        if(cols[5]?.replace(/"/g,"") === "削除済み") return;
+
+        count++;
+
+        const tr = document.createElement("tr");
+
+        for(let i=1;i<=4;i++){
+            const td = document.createElement("td");
+            td.textContent = cols[i]?.replace(/"/g,"") || "";
+            tr.appendChild(td);
+        }
+
+        // 削除ボタン
+        const deleteTd = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.textContent = "削除";
+        btn.className = "delete-btn";
+
+        btn.onclick = () => deleteEntry(
+            cols[1]?.replace(/"/g,""),
+            cols[2]?.replace(/"/g,""),
+            cols[3]?.replace(/"/g,""),
+            cols[4]?.replace(/"/g,"")
+        );
+
+        deleteTd.appendChild(btn);
+        tr.appendChild(deleteTd);
+
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("count").textContent = count;
 }
 
-async function sendEntry(e){
+// 送信
+document.getElementById("form").addEventListener("submit", async e=>{
     e.preventDefault();
 
     const data = new FormData();
-    data.append(entryName, document.getElementById("name").value);
-    data.append(entryGame, document.getElementById("gameid").value);
-    data.append(entryDiscord, document.getElementById("discord").value);
-    data.append(entryComment, document.getElementById("comment").value);
+    data.append(entryName, name.value);
+    data.append(entryGame, gameid.value);
+    data.append(entryDiscord, discord.value);
+    data.append(entryComment, comment.value);
 
     await fetch(formURL,{
         method:"POST",
@@ -33,10 +77,30 @@ async function sendEntry(e){
     });
 
     alert("エントリー完了！");
-    document.getElementById("form").reset();
-    setTimeout(updateCount,1500);
+    form.reset();
+    setTimeout(fetchData,1000);
+});
+
+// 削除処理
+async function deleteEntry(name,game,discord,comment){
+    if(!confirm("削除しますか？")) return;
+
+    const data = new FormData();
+    data.append(entryName,name);
+    data.append(entryGame,game);
+    data.append(entryDiscord,discord);
+    data.append(entryComment,comment);
+    data.append(deleteFlagEntry,"削除済み");
+
+    await fetch(formURL,{
+        method:"POST",
+        mode:"no-cors",
+        body:data
+    });
+
+    alert("削除しました");
+    setTimeout(fetchData,1000);
 }
 
-setInterval(updateCount,5000);
-window.onload = updateCount;
+fetchData();
 </script>
