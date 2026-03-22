@@ -6,6 +6,15 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
 
+<!-- CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+
 <!-- Prettier -->
 <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/standalone.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/parser-html.js"></script>
@@ -15,9 +24,9 @@
 <style>
 body{
     margin:0;
-    font-family:'Fira Code', monospace;
     background:#1e1e1e;
     color:#fff;
+    font-family:'Fira Code', monospace;
     display:flex;
     flex-direction:column;
     height:100vh;
@@ -41,7 +50,6 @@ body{
     background:#111;
     padding:5px;
 }
-
 button{
     margin-right:10px;
 }
@@ -50,42 +58,23 @@ button{
 .editor{
     flex:1;
     display:none;
-    position:relative;
 }
 .editor.active{
     display:block;
 }
 
-.lineNumbers{
-    position:absolute;
-    left:0;
-    top:0;
-    width:40px;
-    background:#111;
-    color:#666;
-    text-align:right;
-    padding-right:5px;
-    font-size:12px;
-}
-
-textarea{
-    width:100%;
+.CodeMirror{
     height:100%;
-    padding-left:50px;
-    background:#1e1e1e;
-    color:#fff;
-    border:none;
-    resize:none;
+    font-size:14px;
 }
 
-/* エラー表示 */
+/* エラー */
 #errorBox{
     background:#030;
     color:#9f9;
     padding:5px;
-    font-size:12px;
     height:60px;
-    overflow:auto;
+    font-size:12px;
 }
 
 /* プレビュー */
@@ -108,39 +97,62 @@ iframe{
 <div class="toolbar">
     <button onclick="formatCode()">整形</button>
     <button onclick="downloadHTML()">ダウンロード</button>
+    <button onclick="goHome()">ホームに戻る</button>
 </div>
 
-<!-- HTML -->
-<div id="html" class="editor active">
-<div class="lineNumbers" id="htmlLines"></div>
-<textarea id="htmlCode"><h1>Hello World</h1></textarea>
-</div>
+<div id="html" class="editor active"></div>
+<div id="css" class="editor"></div>
+<div id="js" class="editor"></div>
 
-<!-- CSS -->
-<div id="css" class="editor">
-<div class="lineNumbers" id="cssLines"></div>
-<textarea id="cssCode">body{color:red;}</textarea>
-</div>
-
-<!-- JS -->
-<div id="js" class="editor">
-<div class="lineNumbers" id="jsLines"></div>
-<textarea id="jsCode">console.log("OK");</textarea>
-</div>
-
-<!-- エラー表示 -->
 <div id="errorBox">OK</div>
-
-<!-- プレビュー -->
 <iframe id="preview"></iframe>
 
 <script>
-const htmlCode = document.getElementById("htmlCode");
-const cssCode = document.getElementById("cssCode");
-const jsCode = document.getElementById("jsCode");
-const preview = document.getElementById("preview");
+let htmlEditor, cssEditor, jsEditor;
 
-// タブ切り替え
+// CodeMirror初期化
+window.onload = () => {
+    htmlEditor = CodeMirror(document.getElementById("html"), {
+        value:`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Page</title>
+</head>
+<body>
+
+<h1>Hello World</h1>
+
+</body>
+</html>`,
+        mode:"xml",
+        theme:"material-darker",
+        lineNumbers:true
+    });
+
+    cssEditor = CodeMirror(document.getElementById("css"), {
+        value:"body{color:red;}",
+        mode:"css",
+        theme:"material-darker",
+        lineNumbers:true
+    });
+
+    jsEditor = CodeMirror(document.getElementById("js"), {
+        value:"console.log('OK');",
+        mode:"javascript",
+        theme:"material-darker",
+        lineNumbers:true
+    });
+
+    load();
+    update();
+
+    htmlEditor.on("change", update);
+    cssEditor.on("change", update);
+    jsEditor.on("change", update);
+};
+
+// タブ
 function switchTab(tab){
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
     document.querySelectorAll(".editor").forEach(e=>e.classList.remove("active"));
@@ -149,97 +161,64 @@ function switchTab(tab){
     document.getElementById(tab).classList.add("active");
 }
 
-// 更新
+// 実行
 function update(){
-    const errorBox = document.getElementById("errorBox");
+    let html = htmlEditor.getValue();
 
-    const html = htmlCode.value;
-    const css = "<style>" + cssCode.value + "</style>";
-
-    const js = `
-    <script>
-    window.onerror = function(msg, url, line){
-        parent.postMessage({
-            type:"error",
-            message: msg + " (Line:" + line + ")"
-        }, "*");
-    };
-
-    try{
-        ${jsCode.value}
-    }catch(e){
-        parent.postMessage({
-            type:"error",
-            message: e.message
-        }, "*");
+    if(html.includes("</body>")){
+        html = html.replace("</body>",
+        `<style>${cssEditor.getValue()}</style>
+<script>
+window.onerror = function(msg,line){
+ parent.postMessage({type:"error",message:msg},"*");
+};
+try{
+${jsEditor.getValue()}
+}catch(e){
+ parent.postMessage({type:"error",message:e.message},"*");
+}
+<\/script>
+</body>`);
     }
-    <\/script>`;
 
-    preview.srcdoc = html + css + js;
+    document.getElementById("preview").srcdoc = html;
 
     save();
-    updateLines();
 
-    errorBox.style.background = "#030";
-    errorBox.innerText = "OK";
+    document.getElementById("errorBox").style.background="#030";
+    document.getElementById("errorBox").innerText="OK";
 }
 
 // エラー受信
-window.addEventListener("message", function(e){
-    if(e.data.type === "error"){
-        const errorBox = document.getElementById("errorBox");
-        errorBox.style.background = "#300";
-        errorBox.innerText = "⚠ " + e.data.message;
+window.addEventListener("message", e=>{
+    if(e.data.type==="error"){
+        const box=document.getElementById("errorBox");
+        box.style.background="#300";
+        box.innerText="⚠ "+e.data.message;
     }
 });
 
 // 保存
 function save(){
-    localStorage.setItem("html", htmlCode.value);
-    localStorage.setItem("css", cssCode.value);
-    localStorage.setItem("js", jsCode.value);
+    localStorage.setItem("html", htmlEditor.getValue());
+    localStorage.setItem("css", cssEditor.getValue());
+    localStorage.setItem("js", jsEditor.getValue());
 }
 
 // 読み込み
 function load(){
-    htmlCode.value = localStorage.getItem("html") || "";
-    cssCode.value = localStorage.getItem("css") || "";
-    jsCode.value = localStorage.getItem("js") || "";
-}
-
-// 行番号
-function updateLines(){
-    setLines(htmlCode, "htmlLines");
-    setLines(cssCode, "cssLines");
-    setLines(jsCode, "jsLines");
-}
-
-function setLines(textarea, id){
-    const lines = textarea.value.split("\n").length;
-    let content = "";
-    for(let i=1;i<=lines;i++){
-        content += i + "<br>";
+    if(localStorage.getItem("html")){
+        htmlEditor.setValue(localStorage.getItem("html"));
+        cssEditor.setValue(localStorage.getItem("css"));
+        jsEditor.setValue(localStorage.getItem("js"));
     }
-    document.getElementById(id).innerHTML = content;
 }
 
 // ダウンロード
 function downloadHTML(){
-    const content = `
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-${cssCode.value}
-</style>
-</head>
-<body>
-${htmlCode.value}
-<script>
-${jsCode.value}
-<\/script>
-</body>
-</html>`;
+    const content = htmlEditor.getValue().replace("</body>",
+        `<style>${cssEditor.getValue()}</style>
+<script>${jsEditor.getValue()}<\/script></body>`);
 
     const blob = new Blob([content], {type:"text/html"});
     const a = document.createElement("a");
@@ -250,20 +229,15 @@ ${jsCode.value}
 
 // 整形
 function formatCode(){
-    htmlCode.value = prettier.format(htmlCode.value, {parser:"html", plugins:prettierPlugins});
-    cssCode.value = prettier.format(cssCode.value, {parser:"css", plugins:prettierPlugins});
-    jsCode.value = prettier.format(jsCode.value, {parser:"babel", plugins:prettierPlugins});
-    update();
+    htmlEditor.setValue(prettier.format(htmlEditor.getValue(), {parser:"html", plugins:prettierPlugins}));
+    cssEditor.setValue(prettier.format(cssEditor.getValue(), {parser:"css", plugins:prettierPlugins}));
+    jsEditor.setValue(prettier.format(jsEditor.getValue(), {parser:"babel", plugins:prettierPlugins}));
 }
 
-// リアルタイム更新
-htmlCode.addEventListener("input", update);
-cssCode.addEventListener("input", update);
-jsCode.addEventListener("input", update);
-
-// 初期化
-load();
-update();
+// ホーム戻る
+function goHome(){
+    window.location.href = "index.html";
+}
 </script>
 
 </body>
