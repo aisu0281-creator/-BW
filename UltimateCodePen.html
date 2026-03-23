@@ -24,10 +24,11 @@
 <style>
 body{
     margin:0;
+    height:100vh;
+    overflow:hidden; /* ← 全体スクロール禁止 */
     background:#1e1e1e;
     color:#fff;
     font-family:'Fira Code', monospace;
-    height:100vh;
     display:flex;
     flex-direction:column;
 }
@@ -35,32 +36,32 @@ body{
 /* レイアウト */
 .main{
     display:flex;
-    flex:1;
+    height:100%;
 }
 
-/* 左 */
+/* 左（エディタ） */
 .left{
     width:50%;
     display:flex;
     flex-direction:column;
     min-width:150px;
-    overflow:auto;
+    overflow:auto; /* ← 個別スクロール */
 }
 
-/* 右 */
+/* 右（プレビュー） */
 .right{
     flex:1;
     display:flex;
     flex-direction:column;
     border-left:2px solid #333;
-    overflow:auto;
+    overflow:auto; /* ← 個別スクロール */
 }
 
 /* ドラッグバー */
 .divider{
     width:5px;
-    cursor:col-resize;
     background:#444;
+    cursor:col-resize;
 }
 
 /* タブ */
@@ -96,21 +97,19 @@ button{
     display:block;
 }
 
-/* CodeMirrorスクロール対応 */
+/* CodeMirror */
 .CodeMirror{
     height:100%;
-    overflow:auto;
 }
 
 /* エラー */
 #errorBox{
     height:50px;
-    font-size:12px;
     padding:5px;
+    font-size:12px;
     background:#030;
     position:sticky;
     top:0;
-    z-index:10;
 }
 
 /* プレビュー */
@@ -135,7 +134,7 @@ iframe{
 }
 
 /* スマホ */
-@media (max-width: 768px){
+@media (max-width:768px){
     .main{
         flex-direction:column;
     }
@@ -181,6 +180,7 @@ iframe{
 <script>
 let htmlEditor, cssEditor, jsEditor;
 
+// 初期化
 window.onload = () => {
     htmlEditor = CodeMirror(document.getElementById("html"), {
         value:`<!DOCTYPE html>
