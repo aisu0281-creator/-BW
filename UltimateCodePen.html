@@ -36,7 +36,6 @@ body{
 .main{
     display:flex;
     flex:1;
-    overflow:hidden;
 }
 
 /* 左 */
@@ -45,6 +44,7 @@ body{
     display:flex;
     flex-direction:column;
     min-width:150px;
+    overflow:auto;
 }
 
 /* 右 */
@@ -53,6 +53,7 @@ body{
     display:flex;
     flex-direction:column;
     border-left:2px solid #333;
+    overflow:auto;
 }
 
 /* ドラッグバー */
@@ -95,8 +96,10 @@ button{
     display:block;
 }
 
+/* CodeMirrorスクロール対応 */
 .CodeMirror{
     height:100%;
+    overflow:auto;
 }
 
 /* エラー */
@@ -105,6 +108,9 @@ button{
     font-size:12px;
     padding:5px;
     background:#030;
+    position:sticky;
+    top:0;
+    z-index:10;
 }
 
 /* プレビュー */
@@ -143,13 +149,13 @@ iframe{
 <body>
 
 <div class="toolbar">
-    <button onclick="toggleLayout()">縦/横切替</button>
+    <button onclick="toggleLayout()">縦/横</button>
     <button onclick="formatCode()">整形</button>
     <button onclick="downloadHTML()">DL</button>
     <button onclick="goHome()">HOME</button>
 </div>
 
-<div class="main" id="main">
+<div class="main">
 
     <div class="left" id="left">
         <div class="tabs">
@@ -175,7 +181,6 @@ iframe{
 <script>
 let htmlEditor, cssEditor, jsEditor;
 
-// 初期化
 window.onload = () => {
     htmlEditor = CodeMirror(document.getElementById("html"), {
         value:`<!DOCTYPE html>
@@ -226,14 +231,19 @@ try{${jsEditor.getValue()}}catch(e){parent.postMessage({type:"error",message:e.m
 
     preview.srcdoc = html;
 
-    document.getElementById("errorBox").innerText="OK";
+    const box = document.getElementById("errorBox");
+    box.style.background="#030";
+    box.innerText="OK";
+
+    save();
 }
 
 // エラー
 window.addEventListener("message", e=>{
     if(e.data.type==="error"){
-        errorBox.style.background="#300";
-        errorBox.innerText="⚠ "+e.data.message;
+        const box=document.getElementById("errorBox");
+        box.style.background="#300";
+        box.innerText="⚠ "+e.data.message;
     }
 });
 
@@ -288,7 +298,7 @@ function load(){
     }
 }
 
-// DL
+// ダウンロード
 function downloadHTML(){
     const content = htmlEditor.getValue().replace("</body>",
     `<style>${cssEditor.getValue()}</style>
