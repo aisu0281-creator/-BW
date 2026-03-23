@@ -33,6 +33,17 @@ body{
     flex-direction:column;
 }
 
+/* ツールバー */
+.toolbar{
+    background:#111;
+    padding:5px;
+    border-bottom:1px solid #333;
+}
+button{
+    margin-right:8px;
+}
+
+/* メイン */
 .main{
     display:flex;
     height:100%;
@@ -55,7 +66,7 @@ body{
     border-left:2px solid #333;
 }
 
-/* ドラッグ */
+/* ドラッグバー */
 .divider{
     width:5px;
     background:#444;
@@ -100,7 +111,7 @@ body{
     top:0;
 }
 
-/* iframe */
+/* プレビュー */
 iframe{
     flex:1;
     border:none;
@@ -126,12 +137,22 @@ iframe{
 
 <body>
 
+<!-- ツールバー -->
+<div class="toolbar">
+    <button onclick="toggleLayout()">縦/横</button>
+    <button onclick="formatCode()">整形</button>
+    <button onclick="downloadHTML()">DL</button>
+    <button onclick="goHome()">HOME</button>
+</div>
+
+<!-- タブ -->
 <div class="tabs">
     <div class="tab active" onclick="switchTab('html')">HTML</div>
     <div class="tab" onclick="switchTab('css')">CSS</div>
     <div class="tab" onclick="switchTab('js')">JS</div>
 </div>
 
+<!-- メイン -->
 <div class="main">
 
 <div class="left" id="left">
@@ -188,7 +209,6 @@ window.onload = () => {
 
     initResize();
 
-    // ← 初期refresh
     setTimeout(()=>{
         htmlEditor.refresh();
         cssEditor.refresh();
@@ -204,7 +224,6 @@ function switchTab(tab){
     document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add("active");
     document.getElementById(tab).classList.add("active");
 
-    // ← 超重要
     setTimeout(()=>{
         htmlEditor.refresh();
         cssEditor.refresh();
@@ -248,8 +267,44 @@ function initResize(){
 
     window.addEventListener("mousemove",e=>{
         if(!dragging)return;
-        left.style.width=e.clientX+"px";
+        if(document.body.classList.contains("vertical")){
+            left.style.height=e.clientY+"px";
+        }else{
+            left.style.width=e.clientX+"px";
+        }
     });
+}
+
+// 縦横切替
+function toggleLayout(){
+    document.body.classList.toggle("vertical");
+}
+
+// 整形
+function formatCode(){
+    htmlEditor.setValue(prettier.format(htmlEditor.getValue(), {parser:"html", plugins:prettierPlugins}));
+    cssEditor.setValue(prettier.format(cssEditor.getValue(), {parser:"css", plugins:prettierPlugins}));
+    jsEditor.setValue(prettier.format(jsEditor.getValue(), {parser:"babel", plugins:prettierPlugins}));
+}
+
+// ダウンロード
+function downloadHTML(){
+    const content = htmlEditor.getValue().replace("</body>",
+    `<style>${cssEditor.getValue()}</style>
+<script>${jsEditor.getValue()}<\/script></body>`);
+
+    const blob = new Blob([content], {type:"text/html"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download="index.html";
+    a.click();
+}
+
+// HOME
+function goHome(){
+    if(confirm("ホームに戻る？")){
+        location.href="index.html";
+    }
 }
 </script>
 
