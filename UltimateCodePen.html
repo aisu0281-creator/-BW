@@ -25,7 +25,7 @@
 body{
     margin:0;
     height:100vh;
-    overflow:hidden; /* ← 全体スクロール禁止 */
+    overflow:hidden;
     background:#1e1e1e;
     color:#fff;
     font-family:'Fira Code', monospace;
@@ -33,31 +33,29 @@ body{
     flex-direction:column;
 }
 
-/* レイアウト */
 .main{
     display:flex;
     height:100%;
 }
 
-/* 左（エディタ） */
+/* 左 */
 .left{
     width:50%;
     display:flex;
     flex-direction:column;
-    min-width:150px;
-    overflow:auto; /* ← 個別スクロール */
+    overflow:auto;
 }
 
-/* 右（プレビュー） */
+/* 右 */
 .right{
     flex:1;
     display:flex;
     flex-direction:column;
+    overflow:auto;
     border-left:2px solid #333;
-    overflow:auto; /* ← 個別スクロール */
 }
 
-/* ドラッグバー */
+/* ドラッグ */
 .divider{
     width:5px;
     background:#444;
@@ -79,15 +77,6 @@ body{
     color:#fff;
 }
 
-/* ツールバー */
-.toolbar{
-    background:#111;
-    padding:5px;
-}
-button{
-    margin-right:8px;
-}
-
 /* エディタ */
 .editor{
     flex:1;
@@ -97,7 +86,6 @@ button{
     display:block;
 }
 
-/* CodeMirror */
 .CodeMirror{
     height:100%;
 }
@@ -112,76 +100,60 @@ button{
     top:0;
 }
 
-/* プレビュー */
+/* iframe */
 iframe{
     flex:1;
-    background:#fff;
     border:none;
 }
 
-/* 縦モード */
+/* 縦 */
 .vertical .main{
     flex-direction:column;
 }
 .vertical .divider{
-    height:5px;
     width:100%;
+    height:5px;
     cursor:row-resize;
-}
-.vertical .right{
-    border-left:none;
-    border-top:2px solid #333;
 }
 
 /* スマホ */
-@media (max-width:768px){
-    .main{
-        flex-direction:column;
-    }
-    .divider{
-        display:none;
-    }
+@media(max-width:768px){
+    .main{flex-direction:column;}
+    .divider{display:none;}
 }
 </style>
 </head>
 
 <body>
 
-<div class="toolbar">
-    <button onclick="toggleLayout()">縦/横</button>
-    <button onclick="formatCode()">整形</button>
-    <button onclick="downloadHTML()">DL</button>
-    <button onclick="goHome()">HOME</button>
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('html')">HTML</div>
+    <div class="tab" onclick="switchTab('css')">CSS</div>
+    <div class="tab" onclick="switchTab('js')">JS</div>
 </div>
 
 <div class="main">
 
-    <div class="left" id="left">
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('html')">HTML</div>
-            <div class="tab" onclick="switchTab('css')">CSS</div>
-            <div class="tab" onclick="switchTab('js')">JS</div>
-        </div>
+<div class="left" id="left">
+    <div id="html" class="editor active"></div>
+    <div id="css" class="editor"></div>
+    <div id="js" class="editor"></div>
+</div>
 
-        <div id="html" class="editor active"></div>
-        <div id="css" class="editor"></div>
-        <div id="js" class="editor"></div>
-    </div>
+<div class="divider" id="divider"></div>
 
-    <div class="divider" id="divider"></div>
-
-    <div class="right">
-        <div id="errorBox">OK</div>
-        <iframe id="preview"></iframe>
-    </div>
+<div class="right">
+    <div id="errorBox">OK</div>
+    <iframe id="preview"></iframe>
+</div>
 
 </div>
 
 <script>
 let htmlEditor, cssEditor, jsEditor;
 
-// 初期化
 window.onload = () => {
+
     htmlEditor = CodeMirror(document.getElementById("html"), {
         value:`<!DOCTYPE html>
 <html>
@@ -208,7 +180,6 @@ window.onload = () => {
         lineNumbers:true
     });
 
-    load();
     update();
 
     htmlEditor.on("change", update);
@@ -216,7 +187,30 @@ window.onload = () => {
     jsEditor.on("change", update);
 
     initResize();
+
+    // ← 初期refresh
+    setTimeout(()=>{
+        htmlEditor.refresh();
+        cssEditor.refresh();
+        jsEditor.refresh();
+    },100);
 };
+
+// タブ
+function switchTab(tab){
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".editor").forEach(e=>e.classList.remove("active"));
+
+    document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add("active");
+    document.getElementById(tab).classList.add("active");
+
+    // ← 超重要
+    setTimeout(()=>{
+        htmlEditor.refresh();
+        cssEditor.refresh();
+        jsEditor.refresh();
+    },10);
+}
 
 // 実行
 function update(){
@@ -231,19 +225,15 @@ try{${jsEditor.getValue()}}catch(e){parent.postMessage({type:"error",message:e.m
 
     preview.srcdoc = html;
 
-    const box = document.getElementById("errorBox");
-    box.style.background="#030";
-    box.innerText="OK";
-
-    save();
+    errorBox.style.background="#030";
+    errorBox.innerText="OK";
 }
 
 // エラー
 window.addEventListener("message", e=>{
     if(e.data.type==="error"){
-        const box=document.getElementById("errorBox");
-        box.style.background="#300";
-        box.innerText="⚠ "+e.data.message;
+        errorBox.style.background="#300";
+        errorBox.innerText="⚠ "+e.data.message;
     }
 });
 
@@ -251,76 +241,15 @@ window.addEventListener("message", e=>{
 function initResize(){
     const divider = document.getElementById("divider");
     const left = document.getElementById("left");
-
     let dragging=false;
 
     divider.addEventListener("mousedown",()=>dragging=true);
     window.addEventListener("mouseup",()=>dragging=false);
 
     window.addEventListener("mousemove",e=>{
-        if(!dragging) return;
-
-        if(document.body.classList.contains("vertical")){
-            left.style.height = e.clientY + "px";
-        }else{
-            left.style.width = e.clientX + "px";
-        }
+        if(!dragging)return;
+        left.style.width=e.clientX+"px";
     });
-}
-
-// 縦横切替
-function toggleLayout(){
-    document.body.classList.toggle("vertical");
-}
-
-// タブ
-function switchTab(tab){
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-    document.querySelectorAll(".editor").forEach(e=>e.classList.remove("active"));
-
-    document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add("active");
-    document.getElementById(tab).classList.add("active");
-}
-
-// 保存
-function save(){
-    localStorage.setItem("html", htmlEditor.getValue());
-    localStorage.setItem("css", cssEditor.getValue());
-    localStorage.setItem("js", jsEditor.getValue());
-}
-
-// 読み込み
-function load(){
-    if(localStorage.getItem("html")){
-        htmlEditor.setValue(localStorage.getItem("html"));
-        cssEditor.setValue(localStorage.getItem("css"));
-        jsEditor.setValue(localStorage.getItem("js"));
-    }
-}
-
-// ダウンロード
-function downloadHTML(){
-    const content = htmlEditor.getValue().replace("</body>",
-    `<style>${cssEditor.getValue()}</style>
-<script>${jsEditor.getValue()}<\/script></body>`);
-
-    const blob = new Blob([content], {type:"text/html"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download="index.html";
-    a.click();
-}
-
-// 整形
-function formatCode(){
-    htmlEditor.setValue(prettier.format(htmlEditor.getValue(), {parser:"html", plugins:prettierPlugins}));
-    cssEditor.setValue(prettier.format(cssEditor.getValue(), {parser:"css", plugins:prettierPlugins}));
-    jsEditor.setValue(prettier.format(jsEditor.getValue(), {parser:"babel", plugins:prettierPlugins}));
-}
-
-// HOME
-function goHome(){
-    location.href="index.html";
 }
 </script>
 
