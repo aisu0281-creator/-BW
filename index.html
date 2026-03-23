@@ -1,116 +1,212 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <title>大会ですよ</title>
-    <style>
-        /* 基本のスタイル */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* よりモダンなフォント */
-            line-height: 1.7; /* 行間を少し広げる */
-            background-color: #f8f9fa; /* ページ全体の薄いグレー */
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box; /* PaddingとBorderを要素の幅に含める */
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50; /* より落ち着いた見出し色 */
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #1a5a96; /* 青系の見出し色 */
-            margin-top: 0;
-            padding-bottom: 8px;
-            border-bottom: 3px solid #2980b9; /* 見出しの下線を強調 */
-            margin-bottom: 20px;
-        }
-        ul {
-            list-style-type: none; /* リストの点を非表示 */
-            padding: 0;
-            margin-left: 15px; /* リストの左インデント */
-        }
-        li {
-            margin-bottom: 12px; /* リスト項目の間隔を調整 */
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-            transition: color 0.2s ease-in-out; /* ホバー時の色変化を滑らかに */
-        }
-        a:hover {
-            color: #0056b3; /* ホバー時の色を濃く */
-            text-decoration: underline;
-        }
+<meta charset="UTF-8">
+<title>大会ですよ</title>
 
-        /* セクションを囲むためのスタイル */
-        .section-container {
-            background-color: #ffffff; /* セクションの背景を白に */
-            border: 1px solid #dee2e6; /* 薄いグレーの枠線 */
-            border-radius: 10px; /* 角を丸く */
-            padding: 25px; /* 内側の余白を広めに */
-            margin-bottom: 30px; /* セクション間の余白 */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* より目立つ影 */
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* ホバー時のアニメーション */
-        }
+<style>
+/* 全体 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.7;
+    margin: 0;
+    padding: 20px;
+    padding-top: 70px;
+    overflow-x: hidden;
+    color: #fff;
+    scroll-behavior: smooth;
+}
 
-        .section-container:hover {
-            transform: translateY(-3px); /* ホバー時に少し浮き上がる */
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
+/* 背景 */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("assets/images/dragon.png");
+    background-size: cover;
+    background-position: center;
+    z-index: -2;
+    animation: bgMove 40s ease-in-out infinite alternate;
+}
 
-        /* 特定のセクション（記事一覧）でリストのスタイルを調整 */
-        .article-list ul {
-            margin-left: 0; /* リストの左インデントをリセット */
-        }
-        .article-list li {
-            position: relative;
-            padding-left: 20px; /* リスト項目への左パディング */
-            margin-bottom: 15px;
-        }
-        .article-list li::before { /* カスタムのリストマーカー */
-            content: '\2022'; /* 黒丸 (Unicode) */
-            color: #007bff; /* 色を青に */
-            font-weight: bold;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-    </style>
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: -1;
+}
+
+@keyframes bgMove {
+    0% {background-position: center top; transform: scale(1);}
+    100% {background-position: center bottom; transform: scale(1.1);}
+}
+
+/* ナビバー */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.nav-links a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* セクション */
+section {
+    background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    color: #333;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.6s;
+}
+
+section.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+h2 {
+    border-bottom: 2px solid #aaa;
+    padding-bottom: 8px;
+}
+
+h2::before {
+    content: "・";
+    margin-right: 8px;
+}
+
+/* スマホ対応 */
+@media (max-width: 768px) {
+    .nav-links a {
+        margin-left: 10px;
+        font-size: 14px;
+    }
+    section {
+        padding: 15px;
+    }
+    h1 {
+        font-size: 22px;
+    }
+}
+</style>
 </head>
 <body>
-    <h1>◆大会用ページ</h1>
 
-    <div class="section-container">
-        <h2>大会概要</h2>
-        <p><strong>大会名:</strong> 第二回シャドバ大会 ○○杯</p>
-        <p><strong>開催日時:</strong> 2025年XX月XX日（X） XX:XX～</p>
-        <p><strong>開催場所:</strong> オンライン開催（できればDiscordを使用）</p>
-        <p><strong>参加資格:</strong> Shadowverseをプレイできる方ならどなたでも！</p>
-        <p><strong>募集期間:</strong> ～2025年XX月XX日（X） XX:XXまで</p>
-        <p><strong>参加費:</strong> 無料</p>
-        <p><strong>賞品:</strong> 次の大会内容を決めれるよ！</p>
+<!-- ナビバー -->
+<div class="navbar">
+    <div class="logo">大会ページ</div>
+    <div class="nav-links">
+        <a href="#">ホーム</a>
+        <a href="entry.html">エントリー</a>
+        <a href="rules.html">ルール</a>
+        <a href="faq.html">FAQ</a>
     </div>
+</div>
 
-    <div class="section-container article-list">
-        <h2>記事一覧</h2>
+<h1>◆大会用ページ◆</h1>
+
+<!-- 大会概要 -->
+<section>
+    <h2>大会概要</h2>
         <ul>
-            <li><a href="entry.html">エントリー</a></li>
-            <li><a href="article1.html">第二回シャドバ大会</a></li>
-            <li><a href="rules.html">大会ルール・レギュレーション</a></li>
-            <li><a href="faq.html">よくある質問</a></li>
-            <li><a href="UltimateCodePen.html">コーディング勉強用</a></li>
+            <li><strong>大会名:</strong> 第二回シャドバ大会 ○○杯</li>
+            <li><strong>開催日時:</strong> 2026年3月23日 20:00</li>
+            <li><strong>デッキ提出:</strong>試合前にデッキコード提出必須</li>
         </ul>
-    </div>
+    
+</section>
 
-    <div class="section-container">
-        <h2>おすすめ動画</h2>
-        <p>↓クリックしな。</p>
-        <a href="https://www.youtube.com/results?search_query=%E3%81%97%E3%82%8D%E3%81%8F%E3%81%BE%E3%82%A2%E3%83%BC%E3%83%A2%E3%83%B3%E3%83%89" target="_blank">しろくまアーモンド</a>
-    </div>
+<!-- カウントダウン -->
+<section>
+    <h2>開催まであと</h2>
+    <p id="countdown"></p>
+</section>
+
+<!-- お知らせ -->
+<section>
+    <h2>お知らせ</h2>
+    <ul>
+        <li>2025/03/01 エントリー開始</li>
+        <li>2025/03/10 ルール更新</li>
+    </ul>
+</section>
+
+<!-- 記事一覧 -->
+<section>
+    <h2>記事一覧</h2>
+    <ul>
+        <li><a href="entry.html">エントリー</a></li>
+        <li><a href="rules.html">大会ルール</a></li>
+        <li><a href="faq.html">よくある質問</a></li>
+        <li><a href="UltimateCodePen.html">コーディング勉強用</a></li>
+    </ul>
+</section>
+
+<script>
+// カウントダウン
+const targetDate = new Date(2026, 2, 23, 20, 0, 0); // 2026年3月23日20時
+
+function updateCountdown() {
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if(diff < 0){
+        document.getElementById("countdown").textContent = "大会は終了しました";
+        return;
+    }
+
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor(diff / (1000*60*60) % 24);
+    const m = Math.floor(diff / (1000*60) % 60);
+    const s = Math.floor(diff / 1000 % 60);
+
+    document.getElementById("countdown").textContent =
+        `${d}日 ${h}時間 ${m}分 ${s}秒`;
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// フェードイン
+const sections = document.querySelectorAll('section');
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting){
+            entry.target.classList.add('show');
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+
+sections.forEach(sec => observer.observe(sec));
+</script>
 
 </body>
 </html>
