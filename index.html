@@ -48,43 +48,56 @@ body::after {
     top: 0;
     left: 0;
     width: 100%;
-    box-sizing: border-box;
     background: rgba(0,0,0,0.7);
     backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    color: white;
     z-index: 1000;
 }
 
-.logo {
-    font-size: 20px;
-    font-weight: bold;
+.nav-links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    text-align: center;
 }
 
 .nav-links a {
     color: white;
-    margin-left: 20px;
     text-decoration: none;
+    padding: 15px 0;
+    border-left: 1px solid rgba(255,255,255,0.2);
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+.nav-links a:first-child {
+    border-left: none;
 }
 
 .nav-links a:hover {
-    text-decoration: underline;
+    background: rgba(255,255,255,0.1);
 }
 
-/* セクション */
+/* 2×2レイアウト */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* カード */
 section {
     background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.85));
     color: #333;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 25px;
-    margin-bottom: 30px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     opacity: 0;
     transform: translateY(20px);
     transition: 0.6s;
+}
+
+/* タップしやすく */
+section:active {
+    transform: scale(0.98);
 }
 
 section.show {
@@ -92,9 +105,14 @@ section.show {
     transform: translateY(0);
 }
 
+h1 {
+    margin-bottom: 20px;
+}
+
 h2 {
     border-bottom: 2px solid #aaa;
     padding-bottom: 8px;
+    font-size: 20px;
 }
 
 h2::before {
@@ -102,17 +120,55 @@ h2::before {
     margin-right: 8px;
 }
 
-/* スマホ対応 */
+/* カウントダウン強調 */
+#countdown {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* ===== スマホ対応 ===== */
 @media (max-width: 768px) {
+
+    body {
+        padding: 10px;
+        padding-top: 70px;
+    }
+
+    /* ナビ → 2×2 */
+    .nav-links {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .nav-links a {
-        margin-left: 10px;
-        font-size: 14px;
+        padding: 12px 0;
+        font-size: 13px;
     }
+
+    /* レイアウト → 縦 */
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    /* カード小さく */
     section {
-        padding: 15px;
+        padding: 18px;
+        border-radius: 10px;
     }
+
     h1 {
         font-size: 22px;
+        text-align: center;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    #countdown {
+        font-size: 20px;
     }
 }
 </style>
@@ -121,7 +177,6 @@ h2::before {
 
 <!-- ナビバー -->
 <div class="navbar">
-    <div class="logo">大会ページ</div>
     <div class="nav-links">
         <a href="#">ホーム</a>
         <a href="entry.html">エントリー</a>
@@ -132,46 +187,46 @@ h2::before {
 
 <h1>◆大会用ページ◆</h1>
 
-<!-- 大会概要 -->
-<section>
-    <h2>大会概要</h2>
+<div class="grid">
+
+    <section>
+        <h2>大会概要</h2>
         <ul>
             <li><strong>大会名:</strong> 第二回シャドバ大会 ○○杯</li>
             <li><strong>開催日時:</strong> 2026年3月23日 20:00</li>
             <li><strong>デッキ提出:</strong>試合前にデッキコード提出必須</li>
+            <li><a href="deckcode.html">デッキコード</a></li>
         </ul>
-    
-</section>
+    </section>
 
-<!-- カウントダウン -->
-<section>
-    <h2>開催まであと</h2>
-    <p id="countdown"></p>
-</section>
+    <section>
+        <h2>開催まであと</h2>
+        <p id="countdown"></p>
+    </section>
 
-<!-- お知らせ -->
-<section>
-    <h2>お知らせ</h2>
-    <ul>
-        <li>2025/03/01 エントリー開始</li>
-        <li>2025/03/10 ルール更新</li>
-    </ul>
-</section>
+    <section>
+        <h2>お知らせ</h2>
+        <ul>
+            <li>2025/03/01 エントリー開始</li>
+            <li>2025/03/10 ルール更新</li>
+        </ul>
+    </section>
 
-<!-- 記事一覧 -->
-<section>
-    <h2>記事一覧</h2>
-    <ul>
-        <li><a href="entry.html">エントリー</a></li>
-        <li><a href="rules.html">大会ルール</a></li>
-        <li><a href="faq.html">よくある質問</a></li>
-        <li><a href="UltimateCodePen.html">コーディング勉強用</a></li>
-    </ul>
-</section>
+    <section>
+        <h2>記事一覧</h2>
+        <ul>
+            <li><a href="entry.html">エントリー</a></li>
+            <li><a href="rules.html">大会ルール</a></li>
+            <li><a href="faq.html">よくある質問</a></li>
+            <li><a href="UltimateCodePen.html">コーディング勉強用</a></li>
+        </ul>
+    </section>
+
+</div>
 
 <script>
 // カウントダウン
-const targetDate = new Date(2026, 2, 23, 20, 0, 0); // 2026年3月23日20時
+const targetDate = new Date(2026, 2, 23, 20, 0, 0);
 
 function updateCountdown() {
     const now = new Date();
@@ -200,7 +255,6 @@ const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if(entry.isIntersecting){
             entry.target.classList.add('show');
-            observer.unobserve(entry.target);
         }
     });
 }, { threshold: 0.1 });
