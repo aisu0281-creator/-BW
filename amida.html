@@ -2,101 +2,57 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>抽選ページ</title>
+<title>抽選ツール</title>
 
 <style>
-/* ===== 元レイアウトそのまま ===== */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.7;
-    margin: 0;
-    padding: 20px;
-    padding-top: 70px;
-    overflow-x: hidden;
-    color: #fff;
-    scroll-behavior: smooth;
+body{
+    font-family:sans-serif;
+    text-align:center;
+    background:#1e3c72;
+    color:white;
 }
 
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: url("assets/images/dragon.png");
-    background-size: cover;
-    background-position: center;
-    z-index: -2;
-    animation: bgMove 40s ease-in-out infinite alternate;
+/* セクション */
+section{
+    background:white;
+    color:#333;
+    border-radius:10px;
+    padding:20px;
+    margin:20px auto;
+    max-width:700px;
 }
 
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: -1;
-}
-
-@keyframes bgMove {
-    0% {background-position: center top; transform: scale(1);}
-    100% {background-position: center bottom; transform: scale(1.1);}
-}
-
-.navbar {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 20px;
-    z-index: 1000;
-}
-
-.nav-links a {
-    color: white;
-    margin-left: 20px;
-    text-decoration: none;
-}
-
-section {
-    background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.85));
-    color: #333;
-    border-radius: 10px;
-    padding: 25px;
-    margin-bottom: 30px;
-}
-
-/* ===== 追加UI ===== */
-input {
-    padding:8px;
-    border-radius:8px;
-    border:none;
-    margin:5px;
-}
-
-button {
-    padding:10px 20px;
-    border:none;
-    border-radius:8px;
+/* 入力タグ */
+.tag{
+    display:inline-block;
     background:#4CAF50;
     color:white;
+    padding:5px 10px;
+    border-radius:20px;
+    margin:5px;
     cursor:pointer;
+}
+.tag:hover{background:red}
+
+/* 結果 */
+.result{
+    font-size:26px;
+    font-weight:bold;
+    color:#ff5722;
 }
 
 /* ルーレット */
-#wheel {
+#wheel{
     width:300px;
     height:300px;
     border-radius:50%;
     margin:20px auto;
     border:5px solid #333;
-    transition: transform 4s;
+    transition: transform 4s cubic-bezier(.2,.8,.2,1);
     position:relative;
     overflow:hidden;
 }
-
-.pointer {
+.pointer{
     width:0;height:0;
     border-left:15px solid transparent;
     border-right:15px solid transparent;
@@ -105,7 +61,7 @@ button {
 }
 
 /* あみだ */
-canvas {
+canvas{
     background:white;
     border-radius:10px;
 }
@@ -114,49 +70,80 @@ canvas {
 
 <body>
 
-<div class="navbar">
-    <div>抽選ページ</div>
-    <div class="nav-links">
-        <a href="#">ホーム</a>
-    </div>
-</div>
+<h1>🏆 抽選ツール</h1>
 
-<h1>◆抽選ツール◆</h1>
-
-<!-- ルーレット -->
+<!-- ===== ルーレット ===== -->
 <section>
 <h2>🎯 ルーレット</h2>
 
-<input id="names" placeholder="A,B,C,D">
-<button onclick="setupWheel()">生成</button>
+<input id="nameInput" placeholder="名前 Enter">
+<button onclick="addName()">追加</button>
+<button onclick="clearNames()">リセット</button>
+
+<div id="nameList"></div>
 
 <div class="pointer"></div>
 <div id="wheel"></div>
 
-<button onclick="spin()">回す</button>
-<p id="result"></p>
+<button onclick="spin()">🎯 回す</button>
+<div id="result" class="result"></div>
 </section>
 
-<!-- あみだ -->
+<!-- ===== あみだ ===== -->
 <section>
 <h2>🎲 あみだくじ</h2>
 
-<input id="amidaNames" placeholder="山田,佐藤,田中">
-<button onclick="createAmida()">生成</button>
+<input id="amidaInput" placeholder="名前 Enter">
+<button onclick="addAmida()">追加</button>
+<button onclick="clearAmida()">リセット</button>
+
+<div id="amidaList"></div>
 
 <canvas id="amida" width="600" height="350"></canvas>
 <p>↑ 名前クリック</p>
-<p id="amidaResult"></p>
+
+<div id="amidaResult" class="result"></div>
 </section>
 
 <script>
-// ===== ルーレット =====
-let items=[], rotation=0;
+/* ===== ルーレット ===== */
+let items=[],rotation=0;
+
+function renderNames(){
+    const list=document.getElementById("nameList");
+    list.innerHTML="";
+    items.forEach((n,i)=>{
+        const span=document.createElement("span");
+        span.className="tag";
+        span.innerText=n;
+        span.onclick=()=>{items.splice(i,1);renderNames();setupWheel();}
+        list.appendChild(span);
+    });
+}
+
+function addName(){
+    const input=document.getElementById("nameInput");
+    if(!input.value)return;
+    items.push(input.value);
+    input.value="";
+    renderNames();
+    setupWheel();
+}
+
+function clearNames(){
+    items=[];
+    renderNames();
+    setupWheel();
+}
+
+document.getElementById("nameInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter") addName();
+});
 
 function setupWheel(){
-    items=document.getElementById("names").value.split(",");
     const wheel=document.getElementById("wheel");
     wheel.innerHTML="";
+    if(items.length===0) return;
 
     const angle=360/items.length;
 
@@ -174,6 +161,7 @@ function setupWheel(){
         text.style.position="absolute";
         text.style.left="100%";
         text.style.top="100%";
+        text.style.fontSize="12px";
 
         div.appendChild(text);
         wheel.appendChild(div);
@@ -181,29 +169,68 @@ function setupWheel(){
 }
 
 function spin(){
+    if(items.length===0)return;
+
     const angle=360/items.length;
     const index=Math.floor(Math.random()*items.length);
+
     const target=360-(index*angle)-angle/2;
-
     rotation+=360*5+target;
-    document.getElementById("wheel").style.transform=`rotate(${rotation}deg)`;
 
+    const wheel=document.getElementById("wheel");
+    wheel.style.transform=`rotate(${rotation}deg)`;
+
+    // ★ 演出
+    document.getElementById("result").innerText="回転中...";
+    
     setTimeout(()=>{
-        document.getElementById("result").innerText="結果: "+items[index];
+        document.getElementById("result").innerText="🎉 "+items[index];
     },4000);
 }
 
-// ===== あみだ =====
+/* ===== あみだ ===== */
 const canvas=document.getElementById("amida");
 const ctx=canvas.getContext("2d");
 
-let names=[],lines=[];
+let amidaNames=[],lines=[];
 let cols,cw,rh;
 const rows=6;
 
+function renderAmida(){
+    const list=document.getElementById("amidaList");
+    list.innerHTML="";
+    amidaNames.forEach((n,i)=>{
+        const span=document.createElement("span");
+        span.className="tag";
+        span.innerText=n;
+        span.onclick=()=>{amidaNames.splice(i,1);renderAmida();createAmida();}
+        list.appendChild(span);
+    });
+}
+
+function addAmida(){
+    const input=document.getElementById("amidaInput");
+    if(!input.value)return;
+    amidaNames.push(input.value);
+    input.value="";
+    renderAmida();
+    createAmida();
+}
+
+function clearAmida(){
+    amidaNames=[];
+    renderAmida();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+document.getElementById("amidaInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter") addAmida();
+});
+
 function createAmida(){
-    names=document.getElementById("amidaNames").value.split(",");
-    cols=names.length;
+    cols=amidaNames.length;
+    if(cols===0)return;
+
     cw=canvas.width/(cols+1);
     rh=canvas.height/(rows+2);
 
@@ -211,7 +238,7 @@ function createAmida(){
     lines=[];
 
     for(let i=0;i<cols;i++){
-        ctx.fillText(names[i],(i+1)*cw,rh*0.7);
+        ctx.fillText(amidaNames[i],(i+1)*cw,rh*0.7);
     }
 
     for(let i=1;i<=cols;i++){
@@ -241,20 +268,67 @@ canvas.addEventListener("click",(e)=>{
 
     if(y<rh){
         let pos=Math.round(x/cw);
-        let current=pos;
+        if(pos<1||pos>cols)return;
 
-        for(let r=1;r<rows;r++){
-            let right=lines.find(l=>l.r===r&&l.c===current);
-            let left=lines.find(l=>l.r===r&&l.c===current-1);
-
-            if(right) current++;
-            else if(left) current--;
-        }
-
-        document.getElementById("amidaResult").innerText =
-            names[pos-1]+" → "+names[current-1];
+        createAmida();
+        animateAmida(pos);
     }
 });
+
+function animateAmida(startPos){
+    const path=[];
+    let current=startPos;
+
+    for(let r=1;r<rows;r++){
+        let right=lines.find(l=>l.r===r&&l.c===current);
+        let left=lines.find(l=>l.r===r&&l.c===current-1);
+
+        if(right){
+            path.push({type:"right",r,current});
+            current++;
+        } else if(left){
+            path.push({type:"left",r,current});
+            current--;
+        }
+
+        path.push({type:"down",r,current});
+    }
+
+    drawAnimation(startPos,path,current);
+}
+
+function drawAnimation(startPos,path,goal){
+    let x=startPos*cw;
+    let y=rh;
+    let i=0;
+
+    const interval=setInterval(()=>{
+        if(i>=path.length){
+            clearInterval(interval);
+            document.getElementById("amidaResult").innerText =
+                "🎉 "+amidaNames[startPos-1]+" → "+amidaNames[goal-1];
+            return;
+        }
+
+        ctx.strokeStyle="red";
+        ctx.lineWidth=3;
+
+        const step=path[i];
+        let nx=x, ny=y;
+
+        if(step.type==="down") ny=(step.r+1)*rh;
+        if(step.type==="right") nx=(step.current+1)*cw;
+        if(step.type==="left") nx=(step.current-1)*cw;
+
+        ctx.beginPath();
+        ctx.moveTo(x,y);
+        ctx.lineTo(nx,ny);
+        ctx.stroke();
+
+        x=nx; y=ny;
+        i++;
+    },150);
+}
 </script>
 
 </body>
