@@ -7,26 +7,26 @@
 <style>
 body{
     font-family:sans-serif;
-    background:#eee;
     text-align:center;
+    background:#eee;
 }
 
-/* レイアウト */
+/* ===== レイアウト ===== */
 .flex{
     display:flex;
     justify-content:center;
     gap:30px;
-    margin-top:20px;
 }
 
-/* ルーレット */
+/* ===== ルーレット ===== */
 #wheel{
     width:400px;
     height:400px;
     border-radius:50%;
-    border:5px solid #333;
+    overflow:hidden;
     position:relative;
-    transition:transform 4s;
+    border:5px solid #333;
+    transition: transform 4s cubic-bezier(.2,.8,.2,1);
 }
 
 .centerText{
@@ -34,47 +34,38 @@ body{
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-    background:rgba(0,0,0,0.5);
+    background:rgba(0,0,0,0.6);
     color:white;
     padding:10px 20px;
     border-radius:10px;
 }
 
-/* ポインター */
 .pointer{
     position:absolute;
     right:-10px;
     top:50%;
     transform:translateY(-50%);
-    width:0;height:0;
+    border-left:20px solid red;
     border-top:10px solid transparent;
     border-bottom:10px solid transparent;
-    border-left:20px solid red;
 }
 
-/* リスト */
-textarea{
-    width:200px;
-    height:300px;
-}
-
-/* ボタン */
-button{
-    padding:8px 15px;
-    margin:5px;
-}
-
-/* あみだ */
+/* ===== あみだ ===== */
 canvas{
     background:white;
     margin-top:20px;
+}
+
+button{
+    margin:5px;
+    padding:6px 12px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Web ルーレット</h1>
+<h1>🎯 ルーレット</h1>
 
 <button onclick="spin()">開始</button>
 <button onclick="reset()">リセット</button>
@@ -91,16 +82,12 @@ canvas{
 3
 4
 5
-6
-7
-8
-9
-10</textarea>
+6</textarea>
 </div>
 
 <hr>
 
-<h2>あみだくじ</h2>
+<h2>🎲 あみだくじ</h2>
 
 <input id="amidaInput">
 <button onclick="addAmida()">追加</button>
@@ -109,43 +96,48 @@ canvas{
 
 <canvas id="amida" width="600" height="400"></canvas>
 
+<p>↑ Goボタンでスタート</p>
+<h3 id="amidaResult"></h3>
+
 <script>
 /* ===== ルーレット ===== */
 let rotation=0;
 
 function setupWheel(){
-    const items=document.getElementById("list").value.split("\n");
+    const items=document.getElementById("list").value.split("\n").filter(v=>v);
     const wheel=document.getElementById("wheel");
     wheel.innerHTML="";
 
     const angle=360/items.length;
 
     items.forEach((n,i)=>{
-        const div=document.createElement("div");
-        div.style.position="absolute";
-        div.style.width="50%";
-        div.style.height="50%";
-        div.style.transformOrigin="100% 100%";
-        div.style.background=`hsl(${i*360/items.length},70%,70%)`;
-        div.style.transform=`rotate(${i*angle}deg) skewY(${90-angle}deg)`;
+        const slice=document.createElement("div");
+
+        slice.style.position="absolute";
+        slice.style.width="100%";
+        slice.style.height="100%";
+        slice.style.clipPath="polygon(50% 50%, 100% 0, 100% 100%)";
+        slice.style.background=`hsl(${i*360/items.length},70%,70%)`;
+        slice.style.transform=`rotate(${i*angle}deg)`;
 
         const text=document.createElement("div");
         text.innerText=n;
         text.style.position="absolute";
-        text.style.left="60%";
-        text.style.top="60%";
-        text.style.transform=`rotate(${angle/2}deg) translate(-50%,-50%)`;
+        text.style.left="70%";
+        text.style.top="50%";
+        text.style.transform="translate(-50%,-50%)";
 
-        div.appendChild(text);
-        wheel.appendChild(div);
+        slice.appendChild(text);
+        wheel.appendChild(slice);
     });
 }
 
 function spin(){
-    const items=document.getElementById("list").value.split("\n");
+    const items=document.getElementById("list").value.split("\n").filter(v=>v);
+    if(items.length===0)return;
+
     const index=Math.floor(Math.random()*items.length);
     const angle=360/items.length;
-
     const target=360-(index*angle)-angle/2;
 
     rotation+=360*5+target;
@@ -165,6 +157,7 @@ function reset(){
 }
 
 setupWheel();
+document.getElementById("list").addEventListener("input",setupWheel);
 
 /* ===== あみだ ===== */
 const canvas=document.getElementById("amida");
@@ -187,9 +180,10 @@ function addAmida(){
 function renderNames(){
     const div=document.getElementById("topNames");
     div.innerHTML="";
+
     names.forEach((n,i)=>{
         const btn=document.createElement("button");
-        btn.innerText="Go";
+        btn.innerText=n+" ▶";
         btn.onclick=()=>startAmida(i+1);
         div.appendChild(btn);
     });
@@ -203,7 +197,7 @@ function drawAmida(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     lines=[];
 
-    // 縦
+    // 縦線
     for(let i=1;i<=cols;i++){
         ctx.beginPath();
         ctx.moveTo(i*cw,20);
@@ -212,7 +206,7 @@ function drawAmida(){
         ctx.stroke();
     }
 
-    // 横
+    // 横線
     for(let r=1;r<rows;r++){
         for(let c=1;c<cols;c++){
             if(Math.random()<0.5){
@@ -226,8 +220,62 @@ function drawAmida(){
     }
 }
 
-function startAmida(pos){
-    alert("スタート: "+names[pos-1]);
+function startAmida(start){
+    let current=start;
+
+    let x=start*(canvas.width/(names.length+1));
+    let y=20;
+
+    let i=0;
+
+    const path=[];
+
+    for(let r=1;r<rows;r++){
+        let right=lines.find(l=>l.r===r&&l.c===current);
+        let left=lines.find(l=>l.r===r&&l.c===current-1);
+
+        if(right){
+            path.push({type:"right",r,current});
+            current++;
+        } else if(left){
+            path.push({type:"left",r,current});
+            current--;
+        }
+
+        path.push({type:"down",r,current});
+    }
+
+    const cw=canvas.width/(names.length+1);
+    const rh=canvas.height/(rows+1);
+
+    const interval=setInterval(()=>{
+        if(i>=path.length){
+            clearInterval(interval);
+            document.getElementById("amidaResult").innerText =
+                "🎉 "+names[start-1]+" → "+current;
+            return;
+        }
+
+        ctx.strokeStyle="red";
+        ctx.lineWidth=3;
+
+        let nx=x, ny=y;
+        const step=path[i];
+
+        if(step.type==="down") ny=(step.r)*rh;
+        if(step.type==="right") nx=(step.current+1)*cw;
+        if(step.type==="left") nx=(step.current-1)*cw;
+
+        ctx.beginPath();
+        ctx.moveTo(x,y);
+        ctx.lineTo(nx,ny);
+        ctx.stroke();
+
+        x=nx;
+        y=ny;
+
+        i++;
+    },120);
 }
 </script>
 
