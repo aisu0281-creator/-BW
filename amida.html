@@ -19,10 +19,10 @@ section{
     border-radius:10px;
     padding:20px;
     margin:20px auto;
-    max-width:700px;
+    max-width:800px;
 }
 
-/* 入力タグ */
+/* タグ */
 .tag{
     display:inline-block;
     background:#4CAF50;
@@ -43,8 +43,8 @@ section{
 
 /* ルーレット */
 #wheel{
-    width:300px;
-    height:300px;
+    width:320px;
+    height:320px;
     border-radius:50%;
     margin:20px auto;
     border:5px solid #333;
@@ -93,14 +93,19 @@ canvas{
 <section>
 <h2>🎲 あみだくじ</h2>
 
-<input id="amidaInput" placeholder="名前 Enter">
+<input id="amidaInput" placeholder="参加者 Enter">
 <button onclick="addAmida()">追加</button>
+
+<input id="goalInput" placeholder="ゴール（例:1位,2位,ハズレ）">
+<button onclick="setGoals()">ゴール設定</button>
+
 <button onclick="clearAmida()">リセット</button>
 
 <div id="amidaList"></div>
+<div id="goalList"></div>
 
-<canvas id="amida" width="600" height="350"></canvas>
-<p>↑ 名前クリック</p>
+<canvas id="amida" width="700" height="400"></canvas>
+<p>↑ 名前クリックでスタート</p>
 
 <div id="amidaResult" class="result"></div>
 </section>
@@ -159,9 +164,12 @@ function setupWheel(){
         const text=document.createElement("div");
         text.innerText=n;
         text.style.position="absolute";
-        text.style.left="100%";
-        text.style.top="100%";
-        text.style.fontSize="12px";
+        text.style.left="60%";
+        text.style.top="60%";
+        text.style.transform=`rotate(${angle/2}deg) translate(-50%,-50%)`;
+        text.style.fontSize="14px";
+        text.style.fontWeight="bold";
+        text.style.color="#000";
 
         div.appendChild(text);
         wheel.appendChild(div);
@@ -177,12 +185,10 @@ function spin(){
     const target=360-(index*angle)-angle/2;
     rotation+=360*5+target;
 
-    const wheel=document.getElementById("wheel");
-    wheel.style.transform=`rotate(${rotation}deg)`;
+    document.getElementById("wheel").style.transform=`rotate(${rotation}deg)`;
 
-    // ★ 演出
     document.getElementById("result").innerText="回転中...";
-    
+
     setTimeout(()=>{
         document.getElementById("result").innerText="🎉 "+items[index];
     },4000);
@@ -192,7 +198,7 @@ function spin(){
 const canvas=document.getElementById("amida");
 const ctx=canvas.getContext("2d");
 
-let amidaNames=[],lines=[];
+let amidaNames=[],goals=[],lines=[];
 let cols,cw,rh;
 const rows=6;
 
@@ -208,6 +214,19 @@ function renderAmida(){
     });
 }
 
+function setGoals(){
+    goals=document.getElementById("goalInput").value.split(",");
+    const list=document.getElementById("goalList");
+    list.innerHTML="";
+    goals.forEach(g=>{
+        const span=document.createElement("span");
+        span.className="tag";
+        span.innerText=g;
+        list.appendChild(span);
+    });
+    createAmida();
+}
+
 function addAmida(){
     const input=document.getElementById("amidaInput");
     if(!input.value)return;
@@ -219,13 +238,11 @@ function addAmida(){
 
 function clearAmida(){
     amidaNames=[];
+    goals=[];
     renderAmida();
+    document.getElementById("goalList").innerHTML="";
     ctx.clearRect(0,0,canvas.width,canvas.height);
 }
-
-document.getElementById("amidaInput").addEventListener("keydown",e=>{
-    if(e.key==="Enter") addAmida();
-});
 
 function createAmida(){
     cols=amidaNames.length;
@@ -237,10 +254,14 @@ function createAmida(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     lines=[];
 
+    ctx.textAlign="center";
+
+    // 上（参加者）
     for(let i=0;i<cols;i++){
         ctx.fillText(amidaNames[i],(i+1)*cw,rh*0.7);
     }
 
+    // 縦線
     for(let i=1;i<=cols;i++){
         ctx.beginPath();
         ctx.moveTo(i*cw,rh);
@@ -248,6 +269,7 @@ function createAmida(){
         ctx.stroke();
     }
 
+    // 横線
     for(let r=1;r<rows;r++){
         for(let c=1;c<cols;c++){
             if(Math.random()<0.5){
@@ -259,6 +281,13 @@ function createAmida(){
             }
         }
     }
+
+    // 下（ゴール）
+    for(let i=0;i<cols;i++){
+        if(goals[i]){
+            ctx.fillText(goals[i],(i+1)*cw,canvas.height-5);
+        }
+    }
 }
 
 canvas.addEventListener("click",(e)=>{
@@ -267,8 +296,9 @@ canvas.addEventListener("click",(e)=>{
     const y=e.clientY-rect.top;
 
     if(y<rh){
-        let pos=Math.round(x/cw);
-        if(pos<1||pos>cols)return;
+        let pos=Math.floor(x/cw+0.5);
+        if(pos<1) pos=1;
+        if(pos>cols) pos=cols;
 
         createAmida();
         animateAmida(pos);
@@ -305,8 +335,9 @@ function drawAnimation(startPos,path,goal){
     const interval=setInterval(()=>{
         if(i>=path.length){
             clearInterval(interval);
+
             document.getElementById("amidaResult").innerText =
-                "🎉 "+amidaNames[startPos-1]+" → "+amidaNames[goal-1];
+                "🎉 "+amidaNames[startPos-1]+" → "+(goals[goal-1]||goal);
             return;
         }
 
@@ -327,7 +358,7 @@ function drawAnimation(startPos,path,goal){
 
         x=nx; y=ny;
         i++;
-    },150);
+    },120);
 }
 </script>
 
