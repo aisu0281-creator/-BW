@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>抽選ページ</title>
+
+<style>
+/* ===== 元レイアウトそのまま ===== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.7;
+    margin: 0;
+    padding: 20px;
+    padding-top: 70px;
+    overflow-x: hidden;
+    color: #fff;
+    scroll-behavior: smooth;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("assets/images/dragon.png");
+    background-size: cover;
+    background-position: center;
+    z-index: -2;
+    animation: bgMove 40s ease-in-out infinite alternate;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: -1;
+}
+
+@keyframes bgMove {
+    0% {background-position: center top; transform: scale(1);}
+    100% {background-position: center bottom; transform: scale(1.1);}
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 20px;
+    z-index: 1000;
+}
+
+.nav-links a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+}
+
+section {
+    background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    color: #333;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+/* ===== 追加UI ===== */
+input {
+    padding:8px;
+    border-radius:8px;
+    border:none;
+    margin:5px;
+}
+
+button {
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#4CAF50;
+    color:white;
+    cursor:pointer;
+}
+
+/* ルーレット */
+#wheel {
+    width:300px;
+    height:300px;
+    border-radius:50%;
+    margin:20px auto;
+    border:5px solid #333;
+    transition: transform 4s;
+    position:relative;
+    overflow:hidden;
+}
+
+.pointer {
+    width:0;height:0;
+    border-left:15px solid transparent;
+    border-right:15px solid transparent;
+    border-bottom:30px solid red;
+    margin:auto;
+}
+
+/* あみだ */
+canvas {
+    background:white;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div>抽選ページ</div>
+    <div class="nav-links">
+        <a href="#">ホーム</a>
+    </div>
+</div>
+
+<h1>◆抽選ツール◆</h1>
+
+<!-- ルーレット -->
+<section>
+<h2>🎯 ルーレット</h2>
+
+<input id="names" placeholder="A,B,C,D">
+<button onclick="setupWheel()">生成</button>
+
+<div class="pointer"></div>
+<div id="wheel"></div>
+
+<button onclick="spin()">回す</button>
+<p id="result"></p>
+</section>
+
+<!-- あみだ -->
+<section>
+<h2>🎲 あみだくじ</h2>
+
+<input id="amidaNames" placeholder="山田,佐藤,田中">
+<button onclick="createAmida()">生成</button>
+
+<canvas id="amida" width="600" height="350"></canvas>
+<p>↑ 名前クリック</p>
+<p id="amidaResult"></p>
+</section>
+
+<script>
+// ===== ルーレット =====
+let items=[], rotation=0;
+
+function setupWheel(){
+    items=document.getElementById("names").value.split(",");
+    const wheel=document.getElementById("wheel");
+    wheel.innerHTML="";
+
+    const angle=360/items.length;
+
+    items.forEach((n,i)=>{
+        const div=document.createElement("div");
+        div.style.position="absolute";
+        div.style.width="50%";
+        div.style.height="50%";
+        div.style.transformOrigin="100% 100%";
+        div.style.background=`hsl(${i*360/items.length},70%,60%)`;
+        div.style.transform=`rotate(${i*angle}deg) skewY(${90-angle}deg)`;
+
+        const text=document.createElement("div");
+        text.innerText=n;
+        text.style.position="absolute";
+        text.style.left="100%";
+        text.style.top="100%";
+
+        div.appendChild(text);
+        wheel.appendChild(div);
+    });
+}
+
+function spin(){
+    const angle=360/items.length;
+    const index=Math.floor(Math.random()*items.length);
+    const target=360-(index*angle)-angle/2;
+
+    rotation+=360*5+target;
+    document.getElementById("wheel").style.transform=`rotate(${rotation}deg)`;
+
+    setTimeout(()=>{
+        document.getElementById("result").innerText="結果: "+items[index];
+    },4000);
+}
+
+// ===== あみだ =====
+const canvas=document.getElementById("amida");
+const ctx=canvas.getContext("2d");
+
+let names=[],lines=[];
+let cols,cw,rh;
+const rows=6;
+
+function createAmida(){
+    names=document.getElementById("amidaNames").value.split(",");
+    cols=names.length;
+    cw=canvas.width/(cols+1);
+    rh=canvas.height/(rows+2);
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    lines=[];
+
+    for(let i=0;i<cols;i++){
+        ctx.fillText(names[i],(i+1)*cw,rh*0.7);
+    }
+
+    for(let i=1;i<=cols;i++){
+        ctx.beginPath();
+        ctx.moveTo(i*cw,rh);
+        ctx.lineTo(i*cw,canvas.height-rh);
+        ctx.stroke();
+    }
+
+    for(let r=1;r<rows;r++){
+        for(let c=1;c<cols;c++){
+            if(Math.random()<0.5){
+                ctx.beginPath();
+                ctx.moveTo(c*cw,(r+1)*rh);
+                ctx.lineTo((c+1)*cw,(r+1)*rh);
+                ctx.stroke();
+                lines.push({r,c});
+            }
+        }
+    }
+}
+
+canvas.addEventListener("click",(e)=>{
+    const rect=canvas.getBoundingClientRect();
+    const x=e.clientX-rect.left;
+    const y=e.clientY-rect.top;
+
+    if(y<rh){
+        let pos=Math.round(x/cw);
+        let current=pos;
+
+        for(let r=1;r<rows;r++){
+            let right=lines.find(l=>l.r===r&&l.c===current);
+            let left=lines.find(l=>l.r===r&&l.c===current-1);
+
+            if(right) current++;
+            else if(left) current--;
+        }
+
+        document.getElementById("amidaResult").innerText =
+            names[pos-1]+" → "+names[current-1];
+    }
+});
+</script>
+
+</body>
+</html>
