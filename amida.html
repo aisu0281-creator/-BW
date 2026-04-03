@@ -89,14 +89,21 @@ button{
 
 <h2>🎲 あみだくじ</h2>
 
-<input id="amidaInput">
+<input id="amidaInput" placeholder="参加者">
 <button onclick="addAmida()">追加</button>
 
+<input id="goalInput" placeholder="ゴール（例:1位,2位,ハズレ）">
+<button onclick="setGoals()">ゴール設定</button>
+
+<br><br>
+<button onclick="createAmida()">作成</button>
+
 <div id="topNames"></div>
+<div id="goalList"></div>
 
 <canvas id="amida" width="600" height="400"></canvas>
 
-<p>↑ Goボタンでスタート</p>
+<p>↑ 作成後に名前ボタンでスタート</p>
 <h3 id="amidaResult"></h3>
 
 <script>
@@ -164,9 +171,11 @@ const canvas=document.getElementById("amida");
 const ctx=canvas.getContext("2d");
 
 let names=[];
+let goals=[];
 let lines=[];
 const rows=8;
 
+/* 名前追加 */
 function addAmida(){
     const input=document.getElementById("amidaInput");
     if(!input.value)return;
@@ -174,9 +183,22 @@ function addAmida(){
     names.push(input.value);
     input.value="";
     renderNames();
-    drawAmida();
 }
 
+/* ゴール設定 */
+function setGoals(){
+    goals=document.getElementById("goalInput").value.split(",");
+
+    const div=document.getElementById("goalList");
+    div.innerHTML="";
+    goals.forEach(g=>{
+        const span=document.createElement("span");
+        span.innerText=g+" ";
+        div.appendChild(span);
+    });
+}
+
+/* 名前表示 */
 function renderNames(){
     const div=document.getElementById("topNames");
     div.innerHTML="";
@@ -189,13 +211,30 @@ function renderNames(){
     });
 }
 
-function drawAmida(){
+/* 作成（ここで初めて線） */
+function createAmida(){
     const cols=names.length;
+    if(cols===0)return;
+
     const cw=canvas.width/(cols+1);
     const rh=canvas.height/(rows+1);
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
     lines=[];
+
+    ctx.textAlign="center";
+
+    // 上（名前）
+    for(let i=0;i<cols;i++){
+        ctx.fillText(names[i],(i+1)*cw,15);
+    }
+
+    // 下（ゴール）
+    for(let i=0;i<cols;i++){
+        if(goals[i]){
+            ctx.fillText(goals[i],(i+1)*cw,canvas.height-5);
+        }
+    }
 
     // 縦線
     for(let i=1;i<=cols;i++){
@@ -220,15 +259,17 @@ function drawAmida(){
     }
 }
 
+/* アニメーション */
 function startAmida(start){
     let current=start;
 
-    let x=start*(canvas.width/(names.length+1));
+    const cw=canvas.width/(names.length+1);
+    const rh=canvas.height/(rows+1);
+
+    let x=start*cw;
     let y=20;
 
-    let i=0;
-
-    const path=[];
+    let path=[];
 
     for(let r=1;r<rows;r++){
         let right=lines.find(l=>l.r===r&&l.c===current);
@@ -245,14 +286,14 @@ function startAmida(start){
         path.push({type:"down",r,current});
     }
 
-    const cw=canvas.width/(names.length+1);
-    const rh=canvas.height/(rows+1);
+    let i=0;
 
     const interval=setInterval(()=>{
         if(i>=path.length){
             clearInterval(interval);
+
             document.getElementById("amidaResult").innerText =
-                "🎉 "+names[start-1]+" → "+current;
+                "🎉 "+names[start-1]+" → "+(goals[current-1]||current);
             return;
         }
 
