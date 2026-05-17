@@ -2,322 +2,1000 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>抽選ツール</title>
 
 <style>
+
 body{
     font-family:sans-serif;
+    background:#ececec;
     text-align:center;
-    background:#eee;
+    margin:20px;
 }
 
-/* ===== レイアウト ===== */
+/* ======================
+   共通
+====================== */
+
+button{
+    padding:10px 18px;
+    margin:5px;
+    border:none;
+    border-radius:10px;
+    background:#3498db;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#2980b9;
+}
+
+textarea,input{
+    padding:10px;
+    font-size:16px;
+    border-radius:8px;
+    border:1px solid #aaa;
+}
+
 .flex{
     display:flex;
     justify-content:center;
-    gap:30px;
+    align-items:flex-start;
+    gap:40px;
+    flex-wrap:wrap;
 }
 
-/* ===== ルーレット ===== */
-#wheel{
-    width:400px;
-    height:400px;
-    border-radius:50%;
-    overflow:hidden;
+/* ======================
+   ルーレット
+====================== */
+
+.wheelWrap{
     position:relative;
-    border:5px solid #333;
-    transition: transform 4s cubic-bezier(.2,.8,.2,1);
+    width:min(90vw,420px);
 }
 
-.centerText{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    background:rgba(0,0,0,0.6);
-    color:white;
-    padding:10px 20px;
-    border-radius:10px;
+#wheel{
+    width:min(90vw,400px);
+    height:min(90vw,400px);
+
+    border-radius:50%;
+    border:8px solid #333;
+    background:white;
+
+    transition:transform 4s cubic-bezier(.2,.8,.2,1);
 }
+
+/* 矢印 */
 
 .pointer{
     position:absolute;
-    right:-10px;
-    top:50%;
-    transform:translateY(-50%);
-    border-left:20px solid red;
-    border-top:10px solid transparent;
-    border-bottom:10px solid transparent;
+
+    top:-18px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    width:0;
+    height:0;
+
+    border-left:18px solid transparent;
+    border-right:18px solid transparent;
+    border-bottom:35px solid red;
+
+    z-index:100;
 }
 
-/* ===== あみだ ===== */
+/* 中央 */
+
+.centerText{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+    background:rgba(0,0,0,0.7);
+
+    color:white;
+
+    padding:12px 24px;
+
+    border-radius:12px;
+
+    font-size:22px;
+    font-weight:bold;
+
+    pointer-events:none;
+}
+
+#list{
+    width:220px;
+    height:260px;
+}
+
+/* ======================
+   あみだ
+====================== */
+
 canvas{
     background:white;
+    border:2px solid #333;
+    max-width:100%;
     margin-top:20px;
 }
 
-button{
+#topNames button{
     margin:5px;
-    padding:6px 12px;
 }
+
+.result{
+    font-size:28px;
+    margin-top:20px;
+    color:#e74c3c;
+    font-weight:bold;
+}
+
+/* ======================
+   履歴
+====================== */
+
+.history{
+    margin-top:20px;
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    display:inline-block;
+    min-width:250px;
+}
+
+/* ======================
+   花火
+====================== */
+
+.firework{
+    position:fixed;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    pointer-events:none;
+    animation:boom 1s linear forwards;
+}
+
+@keyframes boom{
+
+    from{
+        transform:translate(0,0) scale(1);
+        opacity:1;
+    }
+
+    to{
+        transform:
+            translate(
+                var(--x),
+                var(--y)
+            )
+            scale(0);
+
+        opacity:0;
+    }
+
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>🎯 ルーレット</h1>
+<h1>🎯 ルーレット抽選 Ultimate版</h1>
 
 <button onclick="spin()">開始</button>
-<button onclick="reset()">リセット</button>
+
+<button onclick="resetWheel()">
+    リセット
+</button>
+
+<button onclick="toggleRemoveMode()">
+    消えルーレット:
+    <span id="removeModeText">OFF</span>
+</button>
 
 <div class="flex">
-    <div style="position:relative">
-        <div id="wheel"></div>
+
+    <div class="wheelWrap">
+
         <div class="pointer"></div>
-        <div class="centerText" id="centerText">クリックして回転</div>
+
+        <canvas
+            id="wheel"
+            width="400"
+            height="400">
+        </canvas>
+
+        <div
+            class="centerText"
+            id="centerText">
+
+            START
+
+        </div>
+
     </div>
 
-    <textarea id="list">1
+<textarea id="list">1
 2
 3
 4
 5
 6</textarea>
+
+</div>
+
+<div class="history">
+
+    <h3>履歴</h3>
+
+    <div id="history"></div>
+
 </div>
 
 <hr>
 
-<h2>🎲 あみだくじ</h2>
+<h1>🎲 あみだくじ</h1>
 
-<input id="amidaInput" placeholder="参加者">
-<button onclick="addAmida()">追加</button>
+<input
+    id="amidaInput"
+    placeholder="参加者">
 
-<input id="goalInput" placeholder="ゴール（例:1位,2位,ハズレ）">
-<button onclick="setGoals()">ゴール設定</button>
+<button onclick="addAmida()">
+    追加
+</button>
+
+<input
+    id="goalInput"
+    placeholder="1位,2位,ハズレ">
+
+<button onclick="setGoals()">
+    ゴール設定
+</button>
 
 <br><br>
-<button onclick="createAmida()">作成</button>
+
+<button onclick="createAmida()">
+    作成
+</button>
 
 <div id="topNames"></div>
+
 <div id="goalList"></div>
 
-<canvas id="amida" width="600" height="400"></canvas>
+<canvas
+    id="amida"
+    width="700"
+    height="450">
+</canvas>
 
-<p>↑ 作成後に名前ボタンでスタート</p>
-<h3 id="amidaResult"></h3>
+<div
+    class="result"
+    id="amidaResult">
+</div>
 
 <script>
-/* ===== ルーレット ===== */
-let rotation=0;
 
-function setupWheel(){
-    const items=document.getElementById("list").value.split("\n").filter(v=>v);
-    const wheel=document.getElementById("wheel");
-    wheel.innerHTML="";
+/* =====================================
+   効果音
+===================================== */
 
-    const angle=360/items.length;
+const audio =
+    new Audio(
+        "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"
+    );
 
-    items.forEach((n,i)=>{
-        const slice=document.createElement("div");
+/* =====================================
+   ルーレット
+===================================== */
 
-        slice.style.position="absolute";
-        slice.style.width="100%";
-        slice.style.height="100%";
-        slice.style.clipPath="polygon(50% 50%, 100% 0, 100% 100%)";
-        slice.style.background=`hsl(${i*360/items.length},70%,70%)`;
-        slice.style.transform=`rotate(${i*angle}deg)`;
+const wheelCanvas =
+    document.getElementById("wheel");
 
-        const text=document.createElement("div");
-        text.innerText=n;
-        text.style.position="absolute";
-        text.style.left="70%";
-        text.style.top="50%";
-        text.style.transform="translate(-50%,-50%)";
+const wheelCtx =
+    wheelCanvas.getContext("2d");
 
-        slice.appendChild(text);
-        wheel.appendChild(slice);
-    });
+let currentRotation = 0;
+
+let spinning = false;
+
+let removeMode = false;
+
+/* 項目取得 */
+
+function getItems(){
+
+    return document
+        .getElementById("list")
+        .value
+        .split("\n")
+        .filter(v=>v.trim()!=="");
+
 }
+
+/* 保存 */
+
+function saveList(){
+
+    localStorage.setItem(
+        "rouletteItems",
+        document.getElementById("list").value
+    );
+
+}
+
+/* 読込 */
+
+function loadList(){
+
+    const saved =
+        localStorage.getItem(
+            "rouletteItems"
+        );
+
+    if(saved){
+
+        document.getElementById("list")
+            .value = saved;
+
+    }
+
+}
+
+/* 描画 */
+
+function drawWheel(){
+
+    const items = getItems();
+
+    const size =
+        wheelCanvas.width;
+
+    const center =
+        size / 2;
+
+    const radius =
+        center;
+
+    wheelCtx.clearRect(
+        0,
+        0,
+        size,
+        size
+    );
+
+    if(items.length===0) return;
+
+    const angle =
+        (Math.PI*2)/items.length;
+
+    items.forEach((item,i)=>{
+
+        const start =
+            i*angle - Math.PI/2;
+
+        const end =
+            start + angle;
+
+        /* 扇形 */
+
+        wheelCtx.beginPath();
+
+        wheelCtx.moveTo(
+            center,
+            center
+        );
+
+        wheelCtx.arc(
+            center,
+            center,
+            radius,
+            start,
+            end
+        );
+
+        wheelCtx.closePath();
+
+        wheelCtx.fillStyle =
+            `hsl(
+                ${i*360/items.length},
+                70%,
+                70%
+            )`;
+
+        wheelCtx.fill();
+
+        wheelCtx.strokeStyle =
+            "#333";
+
+        wheelCtx.stroke();
+
+        /* テキスト */
+
+        wheelCtx.save();
+
+        wheelCtx.translate(
+            center,
+            center
+        );
+
+        wheelCtx.rotate(
+            start + angle/2
+        );
+
+        wheelCtx.textAlign =
+            "right";
+
+        wheelCtx.fillStyle =
+            "#000";
+
+        wheelCtx.font =
+            "18px sans-serif";
+
+        wheelCtx.fillText(
+            item,
+            radius-20,
+            6
+        );
+
+        wheelCtx.restore();
+
+    });
+
+}
+
+/* 花火 */
+
+function firework(){
+
+    for(let i=0;i<80;i++){
+
+        const div =
+            document.createElement("div");
+
+        div.className = "firework";
+
+        div.style.left =
+            innerWidth/2 + "px";
+
+        div.style.top =
+            innerHeight/2 + "px";
+
+        div.style.background =
+            `hsl(${Math.random()*360},100%,50%)`;
+
+        div.style.setProperty(
+            "--x",
+            (Math.random()-0.5)*600+"px"
+        );
+
+        div.style.setProperty(
+            "--y",
+            (Math.random()-0.5)*600+"px"
+        );
+
+        document.body.appendChild(div);
+
+        setTimeout(()=>{
+            div.remove();
+        },1000);
+
+    }
+
+}
+
+/* 履歴 */
+
+function addHistory(text){
+
+    const div =
+        document.getElementById("history");
+
+    const p =
+        document.createElement("div");
+
+    p.innerText = text;
+
+    div.prepend(p);
+
+}
+
+/* 消えルーレット */
+
+function toggleRemoveMode(){
+
+    removeMode = !removeMode;
+
+    document.getElementById(
+        "removeModeText"
+    ).innerText =
+        removeMode ? "ON" : "OFF";
+
+}
+
+/* 回転 */
 
 function spin(){
-    const items=document.getElementById("list").value.split("\n").filter(v=>v);
-    if(items.length===0)return;
 
-    const index=Math.floor(Math.random()*items.length);
-    const angle=360/items.length;
-    const target=360-(index*angle)-angle/2;
+    if(spinning) return;
 
-    rotation+=360*5+target;
-    document.getElementById("wheel").style.transform=`rotate(${rotation}deg)`;
+    spinning = true;
 
-    document.getElementById("centerText").innerText="回転中...";
+    const items = getItems();
+
+    if(items.length===0){
+
+        spinning = false;
+
+        return;
+
+    }
+
+    const index =
+        Math.floor(
+            Math.random()*items.length
+        );
+
+    const angle =
+        360/items.length;
+
+    /*
+        修正版
+        上矢印と判定を一致
+    */
+
+    const target =
+        -(index*angle)
+        - (angle/2);
+
+    currentRotation =
+        currentRotation
+        + 360*5
+        + (
+            target
+            - (currentRotation%360)
+        );
+
+    wheelCanvas.style.transform =
+        `rotate(${currentRotation}deg)`;
+
+    document
+        .getElementById("centerText")
+        .innerText =
+        "回転中...";
+
+    audio.currentTime = 0;
+
+    audio.play();
 
     setTimeout(()=>{
-        document.getElementById("centerText").innerText="🎉 "+items[index];
+
+        const result =
+            items[index];
+
+        document
+            .getElementById("centerText")
+            .innerText =
+            "🎉 " + result;
+
+        addHistory(result);
+
+        firework();
+
+        /* 消えルーレット */
+
+        if(removeMode){
+
+            items.splice(index,1);
+
+            document.getElementById("list")
+                .value =
+                items.join("\n");
+
+            saveList();
+
+            drawWheel();
+
+        }
+
+        spinning = false;
+
     },4000);
+
 }
 
-function reset(){
-    rotation=0;
-    document.getElementById("wheel").style.transform="rotate(0deg)";
-    document.getElementById("centerText").innerText="クリックして回転";
+/* リセット */
+
+function resetWheel(){
+
+    currentRotation = 0;
+
+    wheelCanvas.style.transform =
+        "rotate(0deg)";
+
+    document
+        .getElementById("centerText")
+        .innerText =
+        "START";
+
 }
 
-setupWheel();
-document.getElementById("list").addEventListener("input",setupWheel);
+/* 初期 */
 
-/* ===== あみだ ===== */
-const canvas=document.getElementById("amida");
-const ctx=canvas.getContext("2d");
+loadList();
 
-let names=[];
-let goals=[];
-let lines=[];
-const rows=8;
+drawWheel();
+
+document
+    .getElementById("list")
+    .addEventListener(
+        "input",
+        ()=>{
+            saveList();
+            drawWheel();
+        }
+    );
+
+/* =====================================
+   あみだ
+===================================== */
+
+const canvas =
+    document.getElementById("amida");
+
+const ctx =
+    canvas.getContext("2d");
+
+let names = [];
+let goals = [];
+let lines = [];
+
+const rows = 8;
 
 /* 名前追加 */
+
 function addAmida(){
-    const input=document.getElementById("amidaInput");
-    if(!input.value)return;
+
+    const input =
+        document.getElementById(
+            "amidaInput"
+        );
+
+    if(!input.value) return;
 
     names.push(input.value);
+
     input.value="";
+
     renderNames();
+
 }
 
-/* ゴール設定 */
+/* ゴール */
+
 function setGoals(){
-    goals=document.getElementById("goalInput").value.split(",");
 
-    const div=document.getElementById("goalList");
+    goals =
+        document
+        .getElementById("goalInput")
+        .value
+        .split(",");
+
+    const div =
+        document.getElementById(
+            "goalList"
+        );
+
     div.innerHTML="";
+
     goals.forEach(g=>{
-        const span=document.createElement("span");
-        span.innerText=g+" ";
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+        span.innerText =
+            g + " ";
+
         div.appendChild(span);
+
     });
+
 }
 
-/* 名前表示 */
+/* 名前ボタン */
+
 function renderNames(){
-    const div=document.getElementById("topNames");
+
+    const div =
+        document.getElementById(
+            "topNames"
+        );
+
     div.innerHTML="";
 
     names.forEach((n,i)=>{
-        const btn=document.createElement("button");
-        btn.innerText=n+" ▶";
-        btn.onclick=()=>startAmida(i+1);
+
+        const btn =
+            document.createElement(
+                "button"
+            );
+
+        btn.innerText =
+            n + " ▶";
+
+        btn.onclick =
+            ()=>startAmida(i+1);
+
         div.appendChild(btn);
+
     });
+
 }
 
-/* 作成（ここで初めて線） */
+/* 作成 */
+
 function createAmida(){
-    const cols=names.length;
-    if(cols===0)return;
 
-    const cw=canvas.width/(cols+1);
-    const rh=canvas.height/(rows+1);
+    const cols =
+        names.length;
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(cols===0) return;
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
     lines=[];
 
-    ctx.textAlign="center";
+    const cw =
+        canvas.width/(cols+1);
 
-    // 上（名前）
+    const rh =
+        canvas.height/(rows+1);
+
+    ctx.strokeStyle="#666";
+
+    ctx.lineWidth=2;
+
+    /* 名前 */
+
     for(let i=0;i<cols;i++){
-        ctx.fillText(names[i],(i+1)*cw,15);
+
+        ctx.fillText(
+            names[i],
+            (i+1)*cw,
+            20
+        );
+
     }
 
-    // 下（ゴール）
+    /* ゴール */
+
     for(let i=0;i<cols;i++){
+
         if(goals[i]){
-            ctx.fillText(goals[i],(i+1)*cw,canvas.height-5);
+
+            ctx.fillText(
+                goals[i],
+                (i+1)*cw,
+                canvas.height-10
+            );
+
         }
+
     }
 
-    // 縦線
+    /* 縦 */
+
     for(let i=1;i<=cols;i++){
+
         ctx.beginPath();
-        ctx.moveTo(i*cw,20);
-        ctx.lineTo(i*cw,canvas.height-20);
-        ctx.strokeStyle="#888";
+
+        ctx.moveTo(
+            i*cw,
+            40
+        );
+
+        ctx.lineTo(
+            i*cw,
+            canvas.height-40
+        );
+
         ctx.stroke();
+
     }
 
-    // 横線
+    /* 横 */
+
     for(let r=1;r<rows;r++){
+
+        let used=[];
+
         for(let c=1;c<cols;c++){
-            if(Math.random()<0.5){
+
+            if(
+                Math.random()<0.45
+                &&
+                !used.includes(c-1)
+            ){
+
                 ctx.beginPath();
-                ctx.moveTo(c*cw,r*rh);
-                ctx.lineTo((c+1)*cw,r*rh);
+
+                ctx.moveTo(
+                    c*cw,
+                    r*rh
+                );
+
+                ctx.lineTo(
+                    (c+1)*cw,
+                    r*rh
+                );
+
                 ctx.stroke();
+
                 lines.push({r,c});
+
+                used.push(c);
+
             }
+
         }
+
     }
+
 }
 
-/* アニメーション */
+/* 開始 */
+
 function startAmida(start){
+
+    createAmida();
+
     let current=start;
 
-    const cw=canvas.width/(names.length+1);
-    const rh=canvas.height/(rows+1);
+    const cw =
+        canvas.width/(names.length+1);
+
+    const rh =
+        canvas.height/(rows+1);
 
     let x=start*cw;
-    let y=20;
+
+    let y=40;
 
     let path=[];
 
     for(let r=1;r<rows;r++){
-        let right=lines.find(l=>l.r===r&&l.c===current);
-        let left=lines.find(l=>l.r===r&&l.c===current-1);
+
+        let right =
+            lines.find(
+                l=>l.r===r&&l.c===current
+            );
+
+        let left =
+            lines.find(
+                l=>l.r===r&&l.c===current-1
+            );
 
         if(right){
-            path.push({type:"right",r,current});
+
+            path.push({
+                type:"right",
+                r,
+                current
+            });
+
             current++;
-        } else if(left){
-            path.push({type:"left",r,current});
-            current--;
+
         }
 
-        path.push({type:"down",r,current});
+        else if(left){
+
+            path.push({
+                type:"left",
+                r,
+                current
+            });
+
+            current--;
+
+        }
+
+        path.push({
+            type:"down",
+            r,
+            current
+        });
+
     }
 
     let i=0;
 
-    const interval=setInterval(()=>{
+    const interval =
+        setInterval(()=>{
+
         if(i>=path.length){
+
             clearInterval(interval);
 
-            document.getElementById("amidaResult").innerText =
-                "🎉 "+names[start-1]+" → "+(goals[current-1]||current);
+            const result =
+                goals[current-1]
+                || current;
+
+            document
+                .getElementById(
+                    "amidaResult"
+                )
+                .innerText =
+                "🎉 "
+                + names[start-1]
+                + " → "
+                + result;
+
+            addHistory(
+                names[start-1]
+                + " → "
+                + result
+            );
+
+            firework();
+
             return;
+
         }
 
         ctx.strokeStyle="red";
-        ctx.lineWidth=3;
 
-        let nx=x, ny=y;
+        ctx.lineWidth=4;
+
+        let nx=x;
+
+        let ny=y;
+
         const step=path[i];
 
-        if(step.type==="down") ny=(step.r)*rh;
-        if(step.type==="right") nx=(step.current+1)*cw;
-        if(step.type==="left") nx=(step.current-1)*cw;
+        if(step.type==="down")
+            ny=(step.r)*rh;
+
+        if(step.type==="right")
+            nx=(step.current+1)*cw;
+
+        if(step.type==="left")
+            nx=(step.current-1)*cw;
 
         ctx.beginPath();
+
         ctx.moveTo(x,y);
+
         ctx.lineTo(nx,ny);
+
         ctx.stroke();
 
         x=nx;
+
         y=ny;
 
         i++;
-    },120);
+
+    },150);
+
 }
+
 </script>
 
 </body>
